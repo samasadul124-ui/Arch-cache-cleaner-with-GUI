@@ -476,3 +476,26 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: fix packaging test shell-variable expansion`
 - **Next task:** helper machine-readable output for elevation wiring.
+
+## Task 46 — PacmanCacheProvider elevation-aware clean (E-011)
+- **Task:** First-class pacman cache cleaning per report §5.
+- **File:** `cachecleaner/providers/pkgman.py`
+- **Purpose:** Detect → measure → authenticate via polkit → clean via helper → verify by fresh measurement → exact reporting.
+- **Changes:** clean() override: dry-run plan; user-writable fallback; elevation.run_paccache; post-clean dir_size re-measurement; freed = before−after (two measurements); exact report strings for cancelled/auth-failed; partial cleanup (remaining>0) NEVER reported as success.
+- **Tests:** Task 47 matrix.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: pacman provider performs polkit-elevated clean with verification (E-011)`
+- **Next task:** engine rewire + tests.
+
+## Task 47 — Engine rewire + pacman test matrix (E-011)
+- **Task:** Root-cause fix: engine must not pre-skip elevation providers; comprehensive tests.
+- **Files:** `cachecleaner/core/engine.py`, `tests/test_providers.py`, `tests/test_engine.py`
+- **Purpose:** Report §6 workflow (click Clean → auth dialog → clean → rescan → freed space).
+- **Changes:** engine.clean calls provider.clean for elevation providers; 7 new pacman tests (detect/size, success-verified, cancelled message, auth-failed message, partial-never-success, dry-run, helper-missing); engine test rewritten for new semantics.
+- **Tests:** provider+engine suites pass.
+- **Errors:** None at run time.
+- **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add pacman elevation matrix and update engine semantics tests`
+- **Next task:** GUI wiring for elevation (rows + clean-all text).

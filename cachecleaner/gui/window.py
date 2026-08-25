@@ -258,12 +258,15 @@ class MainWindow(Adw.ApplicationWindow):
             return
         size = sum(s.size_bytes for s in self.report.scans
                    if s.provider.id in eligible | approved)
-        dlg = Adw.AlertDialog.new(
-            "Clean all cache?",
-            f"This removes {format_bytes(size)} of regenerable cache data "
-            f"from {len(eligible | approved)} providers.\n"
-            "Documents, configurations, credentials and browser profiles "
-            "are never touched.")
+        body = (f"This removes {format_bytes(size)} of regenerable cache data "
+                f"from {len(eligible | approved)} providers.\n"
+                "Documents, configurations, credentials and browser profiles "
+                "are never touched.")
+        if any(s.needs_elevation for s in self.report.scans
+               if s.provider.id in approved):
+            body += ("\n\nThe system authentication dialog will appear for the "
+                     "root-owned pacman package cache.")
+        dlg = Adw.AlertDialog.new("Clean all cache?", body)
         dlg.add_response("cancel", "Cancel")
         dlg.add_response("clean", "Clean")
         dlg.set_response_appearance("clean", Adw.ResponseAppearance.DESTRUCTIVE)

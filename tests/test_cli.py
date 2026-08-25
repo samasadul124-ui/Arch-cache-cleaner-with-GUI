@@ -75,7 +75,8 @@ def test_clean_without_yes_aborts(home, monkeypatch, capsys):
 
 
 def test_version(capsys):
+    from cachecleaner import __version__
     with pytest.raises(SystemExit) as e:
         run(["--version"])
     assert e.value.code == 0
-    assert "0.1.0" in capsys.readouterr().out
+    assert __version__ in capsys.readouterr().out

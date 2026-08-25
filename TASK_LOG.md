@@ -499,3 +499,26 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add pacman elevation matrix and update engine semantics tests`
 - **Next task:** GUI wiring for elevation (rows + clean-all text).
+
+## Task 50 — README: elevation flow + 0.1.1 notes
+- **Task:** Document how pacman-cache elevation works and the 0.1.1 fixes.
+- **File:** `README.md`
+- **Purpose:** Users must understand the auth dialog is the OS's, no password is collected, and exact cancelled/denied/partial messages.
+- **Changes:** New "System (pacman) cache" section; install note referencing E-010/E-011; status → 0.1.1.
+- **Tests:** n/a (docs).
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: document pacman elevation flow and 0.1.1 fixes in README`
+- **Next task:** version bump.
+
+## Task 51 — Version bump to 0.1.1
+- **Task:** Semver patch bump across metadata.
+- **Files:** `pyproject.toml`, `cachecleaner/__init__.py`, `packaging/PKGBUILD` (pkgver 0.1.1, pkgrel 1).
+- **Purpose:** Ship the two user-reported fixes as a proper release; PKGBUILD source URL resolves the new tag.
+- **Changes:** one-file-at-a-time commits, each verified (tomllib parse, import check, grep).
+- **Tests:** full suite after bump.
+- **Errors:** E-012 — hard-coded --version test failed after bump; fixed to import __version__.
+- **Resolution:** dynamic version assertion.
+- **Result:** PASS (full suite).
+- **Git commit:** `task: bump version to 0.1.1 (pyproject/package/PKGBUILD)`
+- **Next task:** final verification, tag v0.1.1, push.

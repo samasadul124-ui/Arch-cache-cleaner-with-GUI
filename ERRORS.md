@@ -203,3 +203,16 @@ Verification: tests/test_elevation.py (fake pkexec: success/cancel/denied/helper
          the helper, full suite + Xvfb GUI smoke.
 Commit:  tasks 43-49 series (see TASK_LOG)
 ```
+
+## E-012 — Version bump broke hard-coded CLI --version test
+```
+Timestamp: 2026-08-25
+Task:    Task 51 — version bump to 0.1.1
+File:    tests/test_cli.py
+Command: pytest tests/
+Error:   test_version asserted literal "0.1.0" → failed after bump to 0.1.1
+Root cause: test hard-coded a version string instead of importing __version__
+Resolution: import cachecleaner.__version__ and assert on it
+Verification: full suite passes
+Commit:  task: version test tracks package version dynamically
+```

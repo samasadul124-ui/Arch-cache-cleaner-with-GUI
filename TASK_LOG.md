@@ -534,3 +534,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add one-command install script`, `task: add complete-removal uninstall script`, `task: add copy-paste install and full-uninstall commands to README`
 - **Next task:** final push + deliver commands to user.
+
+## Tasks 55-57 — E-013 recovery: commit missing sources, integrity guard, v0.1.2
+- **Task:** Fix the incomplete v0.1.1 release (user-reported ImportError at startup).
+- **Files:** `cachecleaner/core/elevation.py`, `tests/test_elevation.py`, `packaging/cachecleaner-paccache` (committed at last), `tests/test_repo_integrity.py` (new guard), version bumps to 0.1.2, `ERRORS.md`, `TASK_LOG.md`
+- **Purpose:** Ship the complete source tree and make this failure class impossible to repeat silently.
+- **Changes:** three missing commits; repo-integrity test asserting every cachecleaner/*.py is git-tracked, tree clean, and all modules importable; semver patch 0.1.2 across pyproject/package/PKGBUILD/README.
+- **Tests:** elevation suite 9 passed; integrity guard 3 passed + 1 skipped (gi absent in that interpreter); full suite 155 passed / 1 skipped; release archive content check performed before tagging.
+- **Errors:** E-013 itself (root cause: aborted commit batch + no git status audit; local tests passing gave false confidence).
+- **Resolution:** commits made, guard added, release verified by downloading the actual tag archive.
+- **Result:** v0.1.2 tagged and pushed.
+- **Git commit:** `task: COMMIT ... (E-013)` series + 0.1.2 bumps
+- **Next task:** deliver reinstall commands to user.

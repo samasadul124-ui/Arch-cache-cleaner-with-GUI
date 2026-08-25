@@ -216,3 +216,31 @@ Resolution: import cachecleaner.__version__ and assert on it
 Verification: full suite passes
 Commit:  task: version test tracks package version dynamically
 ```
+
+## E-013 — elevation module never committed → v0.1.1 shipped incomplete, app crashed on startup (USER-REPORTED)
+```
+Timestamp: 2026-08-25 ~20:34 user local time (build/run on EndeavourOS)
+Task:    Tasks 44-45 commit sequence
+File:    cachecleaner/core/elevation.py, tests/test_elevation.py,
+         packaging/cachecleaner-paccache
+Command: makepkg -si && cachecleaner   (on the user's machine)
+Error:   ImportError: cannot import name 'elevation' from 'cachecleaner.core'
+         — the v0.1.1 wheel/tarball contained every module EXCEPT elevation.py
+Root cause: WORKFLOW FAILURE, not a code bug. The commit batch for the
+         elevation work was aborted by `set -e` when pytest failed during
+         that turn; after fixing and re-running the tests only pytest was
+         executed — the `git add/commit` lines never ran. Subsequent turns
+         used targeted `git add <file>` commits and never ran `git status`,
+         so the three files stayed untracked/modified while local tests kept
+         passing. v0.1.1 was tagged from that incomplete tree.
+Resolution: (1) committed elevation.py, test_elevation.py and the helper
+         byte-accounting upgrade; (2) added tests/test_repo_integrity.py —
+         the test suite now FAILS if any cachecleaner source file is
+         untracked or uncommitted, and imports every module; (3) version
+         bumped to 0.1.2 and the release archive verified by downloading it
+         and checking for elevation.py + FREED_BYTES helper output.
+Verification: full suite 155 passed / 1 skipped; v0.1.2 tarball content
+         check (this release step)
+Commit:  task: COMMIT the polkit elevation module (was untracked, E-013) +
+         follow-up 0.1.2 commits
+```

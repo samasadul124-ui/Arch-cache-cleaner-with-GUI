@@ -27,17 +27,49 @@ bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 * **Clean All with live progress**, per-provider cleaning, cancellation,
   dry-run, and a full report: before / removed / remaining (fresh scan) /
   cleaned / skipped / errors.
-* **Runs as a normal user.** Only the pacman package cache needs root, and
-  that is delegated to a ~40-line audited helper via polkit (`pkexec`) —
-  the GUI itself never runs as root.
+* **Runs as a normal user.** Cleaning the root-owned pacman package cache
+  triggers the **system polkit authentication dialog** from inside the app —
+  the isolated ~40-line audited helper does the privileged work, the GUI
+  itself never runs as root, and the app never asks for, sees or stores your
+  password (see *System (pacman) cache* below).
+
+## System (pacman) cache — how elevation works
+
+`/var/cache/pacman/pkg` belongs to root, so it is handled as a first-class
+provider with explicit privilege escalation:
+
+```
+Open Cache Cleaner → scan → pacman cache detected (real size shown)
+   → you click Clean (or include it via approval + Clean All)
+   → app detects root ownership
+   → system authentication dialog appears (polkit/pkexec)
+   → you authenticate with the OS dialog (never inside this app)
+   → isolated helper deletes the cache
+   → app rescans and reports measured Before / Removed / After
+```
+
+* Cancel the dialog → “Pacman cache cleanup cancelled.” — nothing modified.
+* Wrong password/denied → “Authentication failed. Pacman cache was not
+  modified.”
+* Files left behind → reported as “completed with errors” with exact
+  Removed/Remaining amounts — success is never claimed when files remain.
+
+By default the full cache is removed (matching the size shown in the UI). To
+keep the 2 newest versions of every package instead (downgrade safety):
+`pkexec cachecleaner-paccache 2`.
 
 ## Install (EndeavourOS / Arch)
 
 ```bash
 git clone https://github.com/samasadul124-ui/cache-cleaner
 cd cache-cleaner/packaging
-makepkg -si          # builds cachecleaner-0.1.0-any.pkg.tar.zst and installs
+makepkg -si          # builds cachecleaner-0.1.1-any.pkg.tar.zst and installs
 ```
+
+> v0.1.1 fixes a fresh-install build failure (E-010: the PKGBUILD now
+> resolves the GitHub archive's `cache-cleaner-<version>` source directory
+> independently of the package name) and wires real polkit privilege
+> escalation for the pacman cache (E-011).
 
 Then launch **"Cache Cleaner"** from your application menu, or run
 `cachecleaner`.
@@ -95,9 +127,11 @@ deletes anything from a real home directory.
 
 ## Project status
 
-Version **0.1.0** — feature-complete for the initial goal set and tested, but
-not yet battle-hardened on real user machines. Report issues on the GitHub
-issue tracker.
+Version **0.1.1** — bugfix release over 0.1.0 (PKGBUILD source-directory
+coupling fixed with regression tests; pacman cache cleaning now performs real
+polkit authentication with measured before/after verification). Feature-
+complete for the initial goal set and tested, but not yet battle-hardened on
+many real user machines. Report issues on the GitHub issue tracker.
 
 ## License
 

@@ -188,3 +188,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add XDG desktop cache providers`
 - **Next task:** `cachecleaner/providers/browsers.py`.
+
+## Task 17 — Browser cache providers
+- **Task:** Firefox + Chrome/Chromium/Brave/Edge/Vivaldi/Opera cache providers.
+- **File:** `cachecleaner/providers/browsers.py`
+- **Purpose:** Clean browser disk caches without ever touching profiles/databases/credentials.
+- **Changes:** `FirefoxProvider` targets only `cache2` per profile (classic + XDG + flatpak locations); `_ChromiumProvider` base targets only 7 known cache subdirs per profile.
+- **Tests:** py_compile → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add browser cache providers (Firefox + Chromium family)`
+- **Next task:** `cachecleaner/providers/pkgman.py`.

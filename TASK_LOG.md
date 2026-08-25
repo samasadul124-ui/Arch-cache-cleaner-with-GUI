@@ -255,3 +255,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS (105 total).
 - **Git commit:** `task: add provider safety and detection tests`
 - **Next task:** `cachecleaner/core/discovery.py` — layered software discovery + dynamic "other caches".
+
+## Task 23 — Layered discovery
+- **Task:** Installed-software discovery + dynamic "Other application caches" provider.
+- **File:** `cachecleaner/core/discovery.py`
+- **Purpose:** Rule 13 layers 3-4: use pacman/PATH data; sweep unclaimed ~/.cache children (XDG contract) without full-disk scans.
+- **Changes:** `installed_packages()` (cached pacman -Qq, failure-tolerant), `claimed_cache_basenames()`, `OtherXdgCachesProvider` (skips hidden, denylisted, claimed entries; never follows symlinks).
+- **Tests:** Fixture with pip/myapp/other-tool/tdata/.hidden → only myapp+other-tool offered; pip claimed by PipProvider; tdata denied.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add layered discovery and dynamic XDG cache provider`
+- **Next task:** `cachecleaner/core/engine.py` — scan/clean orchestration.

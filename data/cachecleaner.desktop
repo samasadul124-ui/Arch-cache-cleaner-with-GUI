@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Cache Cleaner
+GenericName=Cache Cleaning Utility
+Comment=Find and safely remove application cache data
+Comment[de]=Anwendungs-Cache sicher finden und bereinigen
+Exec=cachecleaner
+Icon=cachecleaner
+Terminal=false
+Categories=System;Utility;GTK;
+Keywords=cache;clean;cleanup;disk;space;arch;endeavouros;
+StartupNotify=true
+NoDisplay=false

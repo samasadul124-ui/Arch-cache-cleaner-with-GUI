@@ -25,7 +25,7 @@ dependencies = []
 cachecleaner = "cachecleaner.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/samasadul124-ui/cache-cleaner"
+Homepage = "https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI"
 
 [tool.setuptools.packages.find]
 include = ["cachecleaner*"]

@@ -40,3 +40,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** Metadata valid.
 - **Git commit:** `task: add pyproject metadata (version 0.1.0)`
 - **Next task:** `cachecleaner/__init__.py` — package root with version constant.
+
+## Task 4 — Package root
+- **Task:** Create package root with version/identity constants.
+- **File:** `cachecleaner/__init__.py`
+- **Purpose:** Establish importable package; keep GTK out of package import path.
+- **Changes:** `__init__.py` with `__version__`, `APP_ID`, `APP_NAME`.
+- **Tests:** `python3 -c "import cachecleaner"` → PASS (no GTK needed).
+- **Errors:** None.
+- **Resolution:** n/a
+- **Result:** Package importable headless.
+- **Git commit:** `task: add package root module`
+- **Next task:** `cachecleaner/core/units.py` — byte formatting helpers.

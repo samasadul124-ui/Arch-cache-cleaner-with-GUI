@@ -266,3 +266,27 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add layered discovery and dynamic XDG cache provider`
 - **Next task:** `cachecleaner/core/engine.py` — scan/clean orchestration.
+
+## Task 24 — Cleaning engine
+- **Task:** Scan orchestration + clean plan/execute + fresh rescan + dry-run + cancellation + elevation reporting.
+- **File:** `cachecleaner/core/engine.py`
+- **Purpose:** Rules 5/6/14 in one coordinator consumed by both GUI and CLI.
+- **Changes:** `Engine.scan()` (parallel measurement, dynamic XDG provider appended, safety allowlist extended from provider declarations), `Engine.clean()` (per-provider try/except isolation, elevation skip with INSUFFICIENT_PRIVILEGES, conditional approval set, mandatory fresh rescan), structured log events throughout.
+- **Tests:** run via Task 25 suite.
+- **Errors:** E-005 (dry-run removed semantics) — fixed before commit.
+- **Resolution:** `removed_bytes` property branches on dry_run/rescan presence.
+- **Result:** committed.
+- **Git commit:** `task: implement cleaning engine with fresh-rescan verification`
+- **Next task:** `tests/test_engine.py`.
+
+## Task 25 — Engine integration tests
+- **Task:** Rule-15 engine matrix: full clean, fresh rescan (rule 6), recreation-during-clean, per-provider selection, cancellation, failing-provider isolation, conditional approval, elevation skip, partial-cleanup errors, no-cache, dry-run.
+- **File:** `tests/test_engine.py`
+- **Purpose:** End-to-end proof of the cleaning pipeline on a synthetic home.
+- **Changes:** 12 tests.
+- **Tests:** full suite 117 passed.
+- **Errors:** E-005 (engine), E-006 (test design), plus an `IndexError` from asserting on an elevation record that was never produced because the test patched the provider instead of the scan record — fixed by setting `ProviderScan.needs_elevation` directly.
+- **Resolution:** see ERRORS.md + test edits.
+- **Result:** PASS (117 total).
+- **Git commit:** `task: add engine integration tests (12 scenarios)`
+- **Next task:** `cachecleaner/cli.py` — headless CLI (scan/clean/dry-run/JSON).

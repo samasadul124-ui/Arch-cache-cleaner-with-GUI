@@ -79,3 +79,36 @@ Resolution: test registers the exact cache2 root (as the engine will); engine
 Verification: test passes with explicit allowlist; refusal path itself proven correct
 Commit:  task: add provider safety and detection tests
 ```
+
+## E-005 — Dry-run reported 0 B "removed" because rescan saw untouched files
+```
+Timestamp: 2026-08-25 ~07:30 UTC
+Task:    Task 25 — engine tests
+File:    cachecleaner/core/engine.py
+Command: pytest tests/test_engine.py::TestClean::test_dry_run_deletes_nothing
+Error:   assert out.removed_bytes >= 101_000 failed (was 0)
+Root cause: removed_bytes used before−after rescan even in dry-run; since a
+         dry-run deletes nothing, the fresh scan equals 'before' → 0
+Resolution: removed_bytes property returns the planned sum (per-provider
+         traversal counts) when dry_run=True or no rescan ran; real cleans
+         still use the two-measurement rule
+Verification: dry-run test passes; real-clean semantics unchanged (tests green)
+Commit:  task: implement cleaning engine with fresh-rescan verification
+```
+
+## E-006 — Engine test re-created cache too early (test-design flaw)
+```
+Timestamp: 2026-08-25 ~07:28 UTC
+Task:    Task 25 — engine tests
+File:    tests/test_engine.py
+Command: pytest tests/test_engine.py::TestClean::test_cache_recreated_during_cleanup_is_seen_by_rescan
+Error:   after_bytes was 0 instead of 7_000
+Root cause: the test recreated the cache file at the first deletion, i.e.
+         BEFORE the dynamic provider's turn — so it was legitimately deleted
+         by that later provider; only recreation AFTER all cleans exercises
+         rule 6 correctly
+Resolution: rewrite: recreate the file in the progress callback at the
+         'Re-measuring remaining cache…' phase, just before the fresh scan
+Verification: test now asserts measured after_bytes == 7_000; passes
+Commit:  task: add engine integration tests (12 scenarios)
+```

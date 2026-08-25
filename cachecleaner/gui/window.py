@@ -278,18 +278,30 @@ class MainWindow(Adw.ApplicationWindow):
         scan = self.report.by_id(provider_id) if self.report else None
         if not scan:
             return
-        include = set()
-        if scan.provider.safety is SafetyLevel.CONDITIONAL_CACHE:
-            dlg = Adw.AlertDialog.new(f"Clean {scan.provider.name}?",
-                                      scan.provider.explain())
+        if scan.conditional_bytes > 0:
+            # E-014: provider has (partly) approval-requiring data — offer an
+            # explicit choice instead of silently skipping it
+            dlg = Adw.AlertDialog.new(
+                f"Clean {scan.provider.name}?",
+                f"{format_bytes(scan.eligible_bytes)} is regenerable cache and "
+                f"can be cleaned now.\n"
+                f"{format_bytes(scan.conditional_bytes)} additionally requires "
+                f"your explicit approval.\n\n{scan.provider.explain()}")
             dlg.add_response("cancel", "Cancel")
-            dlg.add_response("clean", "Clean")
-            dlg.set_response_appearance("clean", Adw.ResponseAppearance.DESTRUCTIVE)
-            dlg.connect("response", lambda d, r: self._start_clean(
-                {provider_id}, {provider_id}) if r == "clean" else None)
+            dlg.add_response("safe", "Clean regenerable")
+            dlg.add_response("all", "Clean all")
+            dlg.set_response_appearance("safe", Adw.ResponseAppearance.DESTRUCTIVE)
+            dlg.set_response_appearance("all", Adw.ResponseAppearance.DESTRUCTIVE)
+
+            def on_response(_d, r):
+                if r == "safe":
+                    self._start_clean({provider_id}, set())
+                elif r == "all":
+                    self._start_clean({provider_id}, {provider_id})
+            dlg.connect("response", on_response)
             dlg.present(self)
             return
-        self._start_clean({provider_id}, include)
+        self._start_clean({provider_id}, set())
 
     def _start_clean(self, ids: set[str], include: set[str]) -> None:
         if self._busy or not self.report:

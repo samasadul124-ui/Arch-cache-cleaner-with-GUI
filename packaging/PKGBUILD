@@ -23,7 +23,9 @@ conflicts=('cache-cleaner')
 
 _srcrepo=Arch-cache-cleaner-with-GUI
 source=("$_srcrepo-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')   # pin the real sha256 for each tagged release
+# real sha256 of the v$pkgver release tarball (verified at release time).
+# Workflow for each release: tag → download tarball → sha256sum → pin here.
+sha256sums=('25ca0c40f1d0e6c6ac278895ffefce91618185ddd8591826ade2eee26142658e')
 
 build() {
   cd "$srcdir/$_srcrepo-$pkgver"

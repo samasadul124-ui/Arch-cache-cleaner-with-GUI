@@ -33,6 +33,8 @@ ProgressCb = Callable[[float, str], None]      # (fraction 0..1, message)
 class ProviderScan:
     provider: CacheProvider
     size_bytes: int = 0
+    eligible_bytes: int = 0    # cleanable without approval (SAFE paths)
+    conditional_bytes: int = 0  # needs explicit approval (CONDITIONAL paths)
     file_count: int = 0
     path_count: int = 0
     needs_elevation: bool = False
@@ -153,6 +155,7 @@ class Engine:
             scan = ProviderScan(provider=p)
             if res is not None:
                 scan.size_bytes = res.bytes
+                scan.eligible_bytes, scan.conditional_bytes, _ = p.size_breakdown
                 scan.file_count = res.files
                 scan.path_count = len(p.active_paths())
                 for rec in res.errors.records:

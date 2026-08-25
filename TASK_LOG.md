@@ -131,3 +131,27 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS 30/30.
 - **Git commit:** `task: add path-validation safety test matrix`
 - **Next task:** `cachecleaner/core/fs.py` — streaming filesystem measurement & deletion.
+
+## Task 12 — Filesystem measurement & deletion
+- **Task:** Implement real size measurement + safe streaming deletion (rule 4).
+- **File:** `cachecleaner/core/fs.py`
+- **Purpose:** Measure bytes via lstat (never read contents), delete contents without following symlinks, survive vanishing files/permissions/concurrent recreation.
+- **Changes:** `dir_size()` iterative scanner; `delete_contents()` two-phase post-order deleter with safety validation, dry-run, cancellation, throttled progress callback (`progress_every`, default 256 ops).
+- **Tests:** run via Task 13 suite.
+- **Errors:** Initial signature had fixed 256-op progress cadence, making cancellation tests non-deterministic.
+- **Resolution:** Added `progress_every` parameter (tests use cadence 1; production keeps 256 for low overhead).
+- **Result:** committed.
+- **Git commit:** `task: implement filesystem scanner and streaming deletion`
+- **Next task:** `tests/test_fs.py`.
+
+## Task 13 — Filesystem engine tests
+- **Task:** Cover rule-15 fixtures: empty/small/huge cache, missing dir, permission denied, symlinks, broken symlinks, vanishing file, cache recreated during clean, cancellation, dry-run, refusal, root retention.
+- **File:** `tests/test_fs.py`
+- **Purpose:** Prove deletion correctness + safety before any provider uses it.
+- **Changes:** 19 tests incl. 1000-file tree, symlink-escape protection (target untouched), chmod-000 permission capture.
+- **Tests:** `pytest tests/test_fs.py` → 19 passed.
+- **Errors:** None at run time (cadence issue fixed in Task 12 before commit).
+- **Resolution:** n/a
+- **Result:** PASS 19/19.
+- **Git commit:** `task: add filesystem engine tests (19 cases)`
+- **Next task:** `cachecleaner/core/provider.py` — CacheProvider interface + result types.

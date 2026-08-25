@@ -371,3 +371,25 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add scalable application icon`
 - **Next task:** `packaging/PKGBUILD`.
+
+## Task 36 — PKGBUILD
+- **Task:** Native Arch packaging (rule 10, 24).
+- **File:** `packaging/PKGBUILD`
+- **Purpose:** Produce `cachecleaner-0.1.0-any.pkg.tar.zst` on EndeavourOS/Arch.
+- **Changes:** Pure-Python build via `python -m build`/`installer`; installs wheel, `.desktop`, icon, privileged helper, polkit policy, docs. depends: python, python-gobject, gtk4, libadwaita, hicolor-icon-theme; optdepends: polkit, pacman-contrib.
+- **Tests:** bash/XML syntax checks on companion files; `makepkg` itself cannot run on this Debian sandbox (documented; must build on Arch).
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add Arch PKGBUILD`
+- **Next task:** privileged helper.
+
+## Task 37 — Privileged helper + polkit policy
+- **Task:** Isolated root-only cleanup of /var/cache/pacman/pkg (rule 7).
+- **Files:** `packaging/cachecleaner-paccache`, `packaging/io.github.cachecleaner.paccache.policy`
+- **Purpose:** GUI never runs as root; elevation is a one-time polkit auth for a ~40-line auditable script.
+- **Changes:** Bash helper (KEEP-N per package name, default 2; KEEP=0 purges); polkit action `io.github.cachecleaner.paccache` with auth_admin.
+- **Tests:** `bash -n` + XML well-formed; live sandbox test on a fake /var/cache/pacman/pkg: KEEP=2 removed only the oldest of 3 Firefox builds, kept newest two + nano; KEEP=0 removed all; freed-bytes math correct.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS (helper behaviour verified end-to-end).
+- **Git commit:** `task: add isolated privileged pacman-cache helper and polkit policy`
+- **Next task:** `README.md`.

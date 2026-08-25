@@ -63,14 +63,14 @@ keep the 2 newest versions of every package instead (downgrade safety):
 **One-liner — copy & paste:**
 
 ```bash
-git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI && cd cache-cleaner && ./install.sh
+rm -rf ~/Arch-cache-cleaner-with-GUI && git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI && cd Arch-cache-cleaner-with-GUI && ./install.sh
 ```
 
 Or manually:
 
 ```bash
 git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
-cd cache-cleaner/packaging
+cd Arch-cache-cleaner-with-GUI/packaging
 makepkg -si          # builds cachecleaner-0.1.3-any.pkg.tar.zst and installs
 ```
 
@@ -82,7 +82,7 @@ Then launch **"Cache Cleaner"** from your application menu, or run
 **One-liner — copy & paste** (from anywhere):
 
 ```bash
-sudo pacman -Rns cachecleaner && rm -rf ~/.local/state/cachecleaner && rm -rf ~/cache-cleaner
+sudo pacman -Rns cachecleaner; rm -rf ~/.local/state/cachecleaner ~/Arch-cache-cleaner-with-GUI
 ```
 
 What each part does:
@@ -91,7 +91,7 @@ What each part does:
 |---|---|
 | `sudo pacman -Rns cachecleaner` | the app **plus every dependency nothing else needs** and its config files |
 | `rm -rf ~/.local/state/cachecleaner` | the app's private logs/state |
-| `rm -rf ~/cache-cleaner` | the cloned source folder (adjust the path if you cloned elsewhere) |
+| `rm -rf ~/Arch-cache-cleaner-with-GUI` | the cloned source folder (adjust the path if you cloned elsewhere) |
 
 Notes:
 

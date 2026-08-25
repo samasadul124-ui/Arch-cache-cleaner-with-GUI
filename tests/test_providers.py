@@ -250,3 +250,52 @@ class TestPacmanElevation:
                                    ElevationStatus.HELPER_MISSING)):
             r = p.clean()
         assert "not" in r.errors.records[0].detail.lower()  # 'not installed'
+
+
+class TestSizeBreakdown:
+    """E-014: totals must be honest about what Clean can free."""
+
+    def _cargo(self, ctx, home):
+        from cachecleaner.providers.langtools import CargoProvider
+        for sub, n in (("cache/idx", 50_000), ("src/idx", 300_000)):
+            d = home / ".cargo" / "registry" / sub
+            d.mkdir(parents=True)
+            (d / "x").write_bytes(b"x" * n)
+        return CargoProvider(ctx)
+
+    def test_breakdown_reports_safe_and_conditional(self, fx):
+        home, cache, cfg, ctx = fx
+        p = self._cargo(ctx, home)
+        p.calculate_size()
+        assert p.size_breakdown == (50_000, 300_000, 0)
+        assert p.last_size == 350_000
+
+    def test_engine_scan_carries_breakdown(self, fx):
+        home, cache, cfg, ctx = fx
+        self._cargo(ctx, home)
+        from cachecleaner.core.engine import Engine
+        eng = Engine(home=str(home))
+        rep = eng.scan()
+        s = rep.by_id("lang.cargo")
+        assert s.size_bytes == 350_000
+        assert s.eligible_bytes == 50_000
+        assert s.conditional_bytes == 300_000
+
+    def test_plain_clean_frees_only_safe_part(self, fx):
+        home, cache, cfg, ctx = fx
+        p = self._cargo(ctx, home)
+        # emulate Engine._extend_safety: provider-declared paths are allowed
+        ctx.safety = PathSafety(home=str(home), allowed_roots=[
+            str(cache), str(cfg), str(home / ".cargo" / "registry" / "cache"),
+            str(home / ".cargo" / "registry" / "src")])
+        r = p.clean()
+        assert r.bytes_freed == 50_000 and r.skipped_paths == 1
+
+    def test_approval_frees_everything(self, fx):
+        home, cache, cfg, ctx = fx
+        p = self._cargo(ctx, home)
+        ctx.safety = PathSafety(home=str(home), allowed_roots=[
+            str(cache), str(cfg), str(home / ".cargo" / "registry" / "cache"),
+            str(home / ".cargo" / "registry" / "src")])
+        r = p.clean(include_conditional=True)
+        assert r.bytes_freed == 350_000

@@ -348,6 +348,6 @@ class MainWindow(Adw.ApplicationWindow):
             version=__version__,
             comments="Safe cache discovery & cleanup for EndeavourOS / Arch Linux",
             license_type=Gtk.License.GPL_3_0,
-            website="https://github.com/samasadul124-ui/cache-cleaner",
+            website="https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI",
         )
         about.present(self)

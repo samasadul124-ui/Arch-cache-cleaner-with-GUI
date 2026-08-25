@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Packaging artifacts (built on Arch via makepkg, never committed)
+*.pkg.tar.zst
+pkg/
+src/
+
+# Local logs / temporary output
+*.log
+/tmp/

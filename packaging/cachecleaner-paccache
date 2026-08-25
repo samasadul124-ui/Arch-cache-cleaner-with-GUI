@@ -1,31 +1,40 @@
 #!/usr/bin/env bash
-# cachecleaner-paccache — minimal privileged helper (rule 7).
+# cachecleaner-paccache — minimal privileged helper (rule 7, E-011 wiring).
 #
 # The Cache Cleaner GUI runs as the normal user. Cleaning /var/cache/pacman/pkg
 # genuinely needs root, so it is delegated to THIS small script, invoked via:
 #
-#     pkexec cachecleaner-paccache [KEEP]
+#     pkexec /usr/bin/cachecleaner-paccache [KEEP]
 #
-# KEEP (default 2): number of newest package versions to retain per package
+# KEEP (default 0): number of newest package versions to retain per package
 # name (rollback safety). KEEP=0 removes everything.
 #
-# Deliberately tiny and auditable: no network, no arguments beyond KEEP,
-# operates on exactly one directory.
+# Output contract (parsed by cachecleaner.core.elevation):
+#   FREED_BYTES=<int>        bytes actually removed (measured before/after)
+#   REMAINING_BYTES=<int>    bytes still present afterwards (measured)
+#   human-readable summary line
+#
+# Exit codes: 0 success · 1 internal error · 2 bad arguments.
+# Deliberately tiny and auditable: no network, one integer argument, operates
+# on exactly one hard-coded directory. Never stores or sees any password —
+# polkit/pkexec performs authentication before this script starts.
 set -euo pipefail
 
 TARGET="/var/cache/pacman/pkg"
-KEEP="${1:-2}"
+KEEP="${1:-0}"
 
 if [[ $EUID -ne 0 ]]; then
-  echo "error: must run as root (use: pkexec cachecleaner-paccache)" >&2
+  echo "ERROR=not-root: must run as root (use: pkexec cachecleaner-paccache)" >&2
   exit 1
 fi
 if [[ ! "$KEEP" =~ ^[0-9]+$ ]]; then
-  echo "error: KEEP must be an integer (got: $KEEP)" >&2
+  echo "ERROR=bad-args: KEEP must be an integer (got: $KEEP)" >&2
   exit 2
 fi
 if [[ ! -d "$TARGET" ]]; then
-  echo "nothing to do: $TARGET does not exist"
+  echo "FREED_BYTES=0"
+  echo "REMAINING_BYTES=0"
+  echo "pacman cache: nothing to do ($TARGET does not exist)"
   exit 0
 fi
 
@@ -34,17 +43,18 @@ before=$(du -sb "$TARGET" | cut -f1)
 if [[ "$KEEP" -eq 0 ]]; then
   find "$TARGET" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -delete
 else
-  # Keep the $KEEP newest files per package name (name = filename up to the
-  # first '-' that starts a version: pkgname-pkgver-pkgrel-arch.pkg.tar.zst).
+  # Keep the $KEEP newest files per package name (name = filename with the
+  # "-<version>-<rel>-<arch>.pkg.tar.*" suffix stripped).
   find "$TARGET" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -printf '%T@\t%p\n' \
   | sort -rn \
   | awk -F'\t' -v keep="$KEEP" '
       { file=$2; n=split(file, a, "/"); base=a[n];
-        # package name = strip "-<version>-<rel>-<arch>.pkg.tar.*"
         name=base; sub(/-[^-]+-[^-]+-[^.]+\.pkg\.tar\..*$/, "", name);
         seen[name]++; if (seen[name] > keep) print file; }' \
   | while read -r f; do rm -f -- "$f"; done
 fi
 
 after=$(du -sb "$TARGET" | cut -f1)
+echo "FREED_BYTES=$(( before - after ))"
+echo "REMAINING_BYTES=$after"
 echo "pacman cache: freed $(( (before - after) / 1024 )) KiB (kept $KEEP newest per package)"

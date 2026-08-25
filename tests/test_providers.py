@@ -141,3 +141,112 @@ class TestDetectionOnFixture:
     def test_no_cache_detected(self, fx):
         _, _, _, ctx = fx
         assert detect_all(ctx) == []
+
+
+# ================================================================ E-011: pacman
+from unittest import mock
+
+from cachecleaner.core import elevation
+from cachecleaner.core.elevation import ElevationResult, ElevationStatus
+from cachecleaner.providers.pkgman import PacmanCacheProvider
+
+
+def _pacman_fixture(tmp_path):
+    target = tmp_path / "pkg"
+    target.mkdir()
+    for name, n in (("a-1-1-x86_64.pkg.tar.zst", 4000),
+                    ("b-2-1-x86_64.pkg.tar.zst", 6000)):
+        (target / name).write_bytes(b"x" * n)
+    return target
+
+
+def _provider(ctx, target):
+    p = PacmanCacheProvider(ctx)
+    p._target = str(target)
+    return p
+
+
+class TestPacmanElevation:
+    def test_detect_and_size(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+        assert p.detect()
+        assert p.calculate_size().bytes == 10_000
+        assert p.needs_elevation() is False     # user-owned tmp dir
+
+    def test_clean_success_via_helper_is_verified(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+
+        def fake_run(keep=0, **kw):            # helper deletes everything
+            for f in target.iterdir():
+                f.unlink()
+            return ElevationResult(ElevationStatus.SUCCESS, 10_000, 0)
+
+        with mock.patch.object(p, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_paccache", side_effect=fake_run):
+            r = p.clean(include_conditional=True)
+        assert r.bytes_freed == 10_000          # measured before/after
+        assert len(r.errors) == 0
+
+    def test_cancelled_message_and_no_change(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+        with mock.patch.object(p, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_paccache",
+                               return_value=ElevationResult(ElevationStatus.CANCELLED)):
+            r = p.clean()
+        assert r.errors.records[0].detail == "Pacman cache cleanup cancelled."
+        assert sum(f.stat().st_size for f in target.iterdir()) == 10_000
+
+    def test_auth_failed_message_and_no_change(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+        with mock.patch.object(p, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_paccache",
+                               return_value=ElevationResult(ElevationStatus.AUTH_FAILED)):
+            r = p.clean()
+        assert r.errors.records[0].detail == (
+            "Authentication failed. Pacman cache was not modified.")
+        assert len(list(target.iterdir())) == 2
+
+    def test_partial_cleanup_never_reports_success(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+
+        def partial(keep=0, **kw):             # helper could only remove one
+            (target / "a-1-1-x86_64.pkg.tar.zst").unlink()
+            return ElevationResult(ElevationStatus.SUCCESS, 4000, 6000)
+
+        with mock.patch.object(p, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_paccache", side_effect=partial):
+            r = p.clean()
+        assert r.bytes_freed == 4_000
+        assert len(r.errors) == 1
+        assert "completed with errors" in r.errors.records[0].detail
+        assert "remaining: 6000" in r.errors.records[0].detail
+
+    def test_dry_run_plans_without_deleting(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+        with mock.patch.object(p, "needs_elevation", return_value=True):
+            r = p.clean(dry_run=True)
+        assert r.bytes_freed == 10_000
+        assert len(list(target.iterdir())) == 2
+
+    def test_helper_missing_classified(self, fx):
+        home, cache, cfg, ctx = fx
+        target = _pacman_fixture(home)
+        p = _provider(ctx, target)
+        with mock.patch.object(p, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_paccache",
+                               return_value=ElevationResult(
+                                   ElevationStatus.HELPER_MISSING)):
+            r = p.clean()
+        assert "not" in r.errors.records[0].detail.lower()  # 'not installed'

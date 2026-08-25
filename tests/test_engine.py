@@ -144,16 +144,28 @@ class TestClean:
                          include_conditional={"lang.ccache"})
         assert not (ccache / "obj.o").exists()
 
-    def test_elevation_provider_reported_not_cleaned(self, fake_home, monkeypatch):
+    def test_elevation_failure_surfaced_and_others_continue(self, fake_home, monkeypatch):
+        """E-011: elevation providers clean through their own clean(); a failed
+        authentication surfaces as an error without blocking other providers."""
         eng = Engine(home=str(fake_home))
         rep = eng.scan()
-        # simulate a privileged provider recorded by the scan (e.g. pacman cache)
-        s = rep.scans[0]
+        s = rep.by_id("xdg.thumbnails")
         s.needs_elevation = True
-        out = eng.clean(rep, provider_ids={s.provider.id}, rescan=False)
-        r = out.per_provider[0]
+
+        class DeniedProvider:
+            id = s.provider.id
+            def clean(self, **kw):
+                from cachecleaner.core.provider import ProviderCleanResult
+                r = ProviderCleanResult(provider_id=self.id, attempted=True)
+                r.errors.add(ErrorKind.INSUFFICIENT_PRIVILEGES, self.id, self.id,
+                             "Authentication failed. Pacman cache was not modified.")
+                return r
+
+        s.provider = DeniedProvider()
+        out = eng.clean(rep, rescan=False)
+        r = next(x for x in out.per_provider if x.provider_id == "xdg.thumbnails")
         assert r.errors.records[0].kind is ErrorKind.INSUFFICIENT_PRIVILEGES
-        assert r.attempted is False
+        assert len(out.cleaned) >= 1          # other providers still cleaned
 
     def test_partial_cleanup_counts(self, fake_home):
         locked = fake_home / ".cache" / "someapp" / "locked"

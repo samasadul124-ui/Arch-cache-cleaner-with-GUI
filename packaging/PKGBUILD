@@ -10,7 +10,7 @@ pkgver=0.1.2
 pkgrel=1
 pkgdesc="Modern, safe cache-cleaning utility (GTK4/libadwaita) for EndeavourOS / Arch Linux"
 arch=('any')
-url="https://github.com/samasadul124-ui/cache-cleaner"
+url="https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI"
 license=('GPL-3.0-or-later')
 depends=('python' 'python-gobject' 'gtk4' 'libadwaita' 'hicolor-icon-theme')
 optdepends=('polkit: clean the root-owned pacman package cache via the isolated helper'
@@ -21,7 +21,7 @@ makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools
 provides=("cache-cleaner=$pkgver")
 conflicts=('cache-cleaner')
 
-_srcrepo=cache-cleaner
+_srcrepo=Arch-cache-cleaner-with-GUI
 source=("$_srcrepo-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')   # pin the real sha256 for each tagged release
 

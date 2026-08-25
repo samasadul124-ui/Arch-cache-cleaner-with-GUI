@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cachecleaner"
+version = "0.1.0"
+description = "Modern, safe cache-cleaning utility for EndeavourOS / Arch Linux (GTK4/libadwaita)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "samasadul124-ui" }]
+keywords = ["cache", "cleaner", "arch", "endeavouros", "gtk4", "libadwaita"]
+classifiers = [
+    "Environment :: X11 Applications :: GTK",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: System :: Archiving :: Cleanup",
+]
+# Runtime is intentionally dependency-free: GUI binds system GTK4/libadwaita
+# through PyGObject (distro package python-gobject), no pip wheels bundled.
+dependencies = []
+
+[project.scripts]
+cachecleaner = "cachecleaner.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/samasadul124-ui/cache-cleaner"
+
+[tool.setuptools.packages.find]
+include = ["cachecleaner*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

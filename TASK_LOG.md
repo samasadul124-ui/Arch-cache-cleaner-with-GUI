@@ -28,3 +28,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** Design baseline committed.
 - **Git commit:** `task: add architecture and technology decision document`
 - **Next task:** `pyproject.toml` — project metadata (name, version 0.1.0, entry points).
+
+## Task 3 — Project metadata
+- **Task:** Define package metadata, version 0.1.0, entry point.
+- **File:** `pyproject.toml`
+- **Purpose:** Fix name/version/entry point before writing package code; document zero-pip-dependency runtime.
+- **Changes:** Created setuptools-based `pyproject.toml` (version 0.1.0, console script `cachecleaner`, pytest config).
+- **Tests:** Parsed with `tomllib`; asserted name/version/entry point → PASS.
+- **Errors:** None.
+- **Resolution:** n/a
+- **Result:** Metadata valid.
+- **Git commit:** `task: add pyproject metadata (version 0.1.0)`
+- **Next task:** `cachecleaner/__init__.py` — package root with version constant.

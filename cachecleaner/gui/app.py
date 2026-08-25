@@ -6,9 +6,9 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from .. import APP_ID, APP_NAME, __version__  # noqa: E402
+from .. import APP_ID, APP_NAME  # noqa: E402
 from ..core import log  # noqa: E402
 
 _logger = log.get_logger("gui.app")
@@ -25,8 +25,7 @@ class CacheCleanerApp(Adw.Application):
     def __init__(self) -> None:
         super().__init__(application_id=APP_ID,
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
-        self.set_application_name(APP_NAME)
-        self.set_version(__version__)
+        GLib.set_application_name(APP_NAME)
         self.window = None
 
     def do_activate(self) -> None:  # noqa: N802 (GObject vfunc)

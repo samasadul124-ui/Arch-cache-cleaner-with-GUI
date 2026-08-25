@@ -54,10 +54,11 @@ class MainWindow(Adw.ApplicationWindow):
         menu_btn.set_icon_name("open-menu-symbolic")
         menu_btn.set_menu_model(menu)
         header.pack_end(menu_btn)
-        about = Gtk.SimpleAction.new("about", None)
+        about = Gio.SimpleAction.new("about", None)
         about.connect("activate", self._show_about)
         self.add_action(about)
-        self.set_titlebar(header)
+        self._toolbar_view = Adw.ToolbarView()
+        self._toolbar_view.add_top_bar(header)
 
         # ---------------------------------------------------------- content
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
@@ -152,7 +153,8 @@ class MainWindow(Adw.ApplicationWindow):
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled.set_vexpand(True)
         scrolled.set_child(content)
-        self.set_content(scrolled)
+        self._toolbar_view.set_content(scrolled)
+        self.set_content(self._toolbar_view)
 
         log.log_event(_logger, "window_ready")
         self.start_scan()

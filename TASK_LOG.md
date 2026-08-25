@@ -221,3 +221,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add language toolchain cache providers`
 - **Next task:** `cachecleaner/providers/electron.py`.
+
+## Task 20 — Electron app cache providers
+- **Task:** VS Code, VSCodium, dynamic generic-Electron provider.
+- **File:** `cachecleaner/providers/electron.py`
+- **Purpose:** Clean Electron disk/code/GPU caches without touching accounts/settings; exclude Telegram (session data) and browsers owned by dedicated providers.
+- **Changes:** `_VscodeLikeProvider` (adds workspaceStorage as CONDITIONAL), `ElectronAppsProvider` scanning `~/.config/*/{Cache,Code Cache,GPUCache,CachedData}` with explicit exclusion list.
+- **Tests:** py_compile → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add Electron app cache providers with Telegram exclusion`
+- **Next task:** `cachecleaner/providers/__init__.py` — provider registry.

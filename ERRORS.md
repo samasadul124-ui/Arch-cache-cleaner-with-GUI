@@ -244,3 +244,30 @@ Verification: full suite 155 passed / 1 skipped; v0.1.2 tarball content
 Commit:  task: COMMIT the polkit elevation module (was untracked, E-013) +
          follow-up 0.1.2 commits
 ```
+
+## E-014 — Mixed-safety providers displayed a total the Clean button could not free (USER-REPORTED)
+```
+Timestamp: 2026-08-26 (user machine: Cargo row showed 311.0 MiB; clicking Clean
+         re-scanned to the same value; fontcache 0 B rows looked 'broken')
+Task:    Tasks 64-68 — honest size breakdown
+File:    cachecleaner/core/provider.py, core/engine.py, gui/provider_row.py,
+         gui/window.py
+Command: GUI: click Clean on Cargo
+Error:   Cargo row total (311 MiB) = SAFE registry/cache + CONDITIONAL
+         registry/src; plain Clean removed only the SAFE share and silently
+         skipped src → post-clean rescan showed ~the same size; user perceived
+         'cleaning does nothing'
+Root cause: UI presented one undifferentiated total while clean() correctly
+         required approval for the conditional share — a transparency bug,
+         not a deletion bug (deletion behaved exactly as the safety model
+         mandates)
+Resolution: calculate_size() records (safe, conditional, protected) bytes;
+         ProviderScan exposes eligible_bytes/conditional_bytes; rows with a
+         conditional share show 'X cleanable now · Y needs approval' plus an
+         Include checkbox; per-provider Clean opens a three-choice dialog
+         (Cancel / Clean regenerable / Clean all)
+Verification: reproduced pre-fix (50k freed of 350k, 300k silently remained);
+         post-fix tests assert breakdown fields and dialog-level semantics;
+         full suite + GUI smoke
+Commit:  E-014 commit series
+```

@@ -582,3 +582,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** pushed.
 - **Git commit:** `task: fix stale clone-folder paths and make one-liners idempotent`, `task: uninstall script references renamed clone folder`
 - **Next task:** deliver working commands to user.
+
+## Tasks 64-68 — Honest size breakdown (E-014)
+- **Task:** Make per-provider totals truthful about what Clean frees.
+- **Files:** `cachecleaner/core/provider.py`, `cachecleaner/core/engine.py`, `cachecleaner/gui/provider_row.py`, `cachecleaner/gui/window.py`, `tests/test_providers.py`
+- **Purpose:** User-reported Cargo 'clean does nothing': total included approval-requiring data that plain Clean must skip by design.
+- **Changes:** per-safety breakdown recorded at scan; ProviderScan.eligible_bytes/conditional_bytes; row caption 'X cleanable now · Y needs approval' + Include checkbox for mixed providers; three-choice Clean dialog (Cancel/Clean regenerable/Clean all); 4 regression tests.
+- **Tests:** reproduced bug pre-fix; post-fix provider/engine tests green; repo-integrity guard correctly flagged the in-flight changes.
+- **Errors:** none new; the two direct-provider test failures were the expected E-004 pattern (tests must register provider-declared allowed roots) — fixed accordingly.
+- **Resolution:** as above.
+- **Result:** committed.
+- **Git commit:** E-014 series
+- **Next task:** version 0.1.4 + release with pinned sha.

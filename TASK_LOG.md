@@ -52,3 +52,36 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** Package importable headless.
 - **Git commit:** `task: add package root module`
 - **Next task:** `cachecleaner/core/units.py` — byte formatting helpers.
+
+## Task 5 — core subpackage root
+- **Task:** Create `cachecleaner/core/__init__.py`.
+- **File:** `cachecleaner/core/__init__.py`
+- **Purpose:** Establish headless-safe core subpackage.
+- **Changes:** Docstring module, no imports.
+- **Tests:** covered by package import in Task 6 run.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add core subpackage root`
+- **Next task:** `cachecleaner/core/units.py`.
+
+## Task 6 — Byte/duration formatting helpers
+- **Task:** Human-readable size/duration formatting used by GUI, CLI and reports.
+- **File:** `cachecleaner/core/units.py`
+- **Purpose:** UI needs 'GiB' style labels; reports need durations. Pure functions, no I/O.
+- **Changes:** `format_bytes`, `parse_size`, `format_duration` with NaN/negative guards.
+- **Tests:** executed with Task 7's test file (see below).
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add byte/duration formatting helpers`
+- **Next task:** `tests/test_units.py`.
+
+## Task 7 — Unit tests for formatting helpers
+- **Task:** Test matrix for units module.
+- **File:** `tests/test_units.py`
+- **Purpose:** Lock down formatting behaviour (zero, KiB/MiB/GiB/TiB, negatives, NaN, parsing, durations).
+- **Changes:** 18 test cases.
+- **Tests:** `pytest tests/test_units.py` → all passed.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add unit tests for formatting helpers`
+- **Next task:** `cachecleaner/core/errors.py` — classified error types.

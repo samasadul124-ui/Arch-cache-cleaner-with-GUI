@@ -69,6 +69,12 @@ rc = app.run([])
 print(f"GUI SMOKE RESULT: rc={rc} {result}")
 assert rc == 0, f"app exit code {rc}"
 assert "error" not in result, result
-assert result["total"] == "13.0 KiB", result          # 13_345 bytes
 assert result["rows"] >= 2, result
+assert result["total"] not in ("", "—"), result
+# NOTE: GTK initialises fontconfig during window creation, which legitimately
+# creates ~/.cache/fontconfig in the fixture — so the total is machine-state
+# dependent. Assert the exact pip measurement via the scan report instead:
+win = app.window
+pip_scan = win.report.by_id("lang.pip")
+assert pip_scan is not None and pip_scan.size_bytes == 12_345, pip_scan
 print("GUI SMOKE TEST PASS")

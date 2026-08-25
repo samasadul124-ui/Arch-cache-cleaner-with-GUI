@@ -11,8 +11,8 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Purpose:** All subsequent work must be committed per task; journals are required to record tasks/errors from the very first step.
 - **Changes:** Repo `cache-cleaner` created on GitHub (public) via API; local repo initialized on `main`; remote configured; bootstrap files written.
 - **Tests:** `git push` succeeds to `origin/main` (remote is empty until this commit).
-- **Errors:** None.
-- **Resolution:** n/a
+- **Errors:** E-001 — first bootstrap attempt failed (shell error, 123 ms) because the tool call used `cwd=/home/user/cache-cleaner` before that directory existed. See `ERRORS.md`.
+- **Resolution:** Re-ran the bootstrap with `cwd=/home/user`, creating the directory inside the script.
 - **Result:** Repository ready for one-file-at-a-time development.
 - **Git commit:** `task: initialize repository, gitignore and project journals`
 - **Next task:** `ARCHITECTURE.md` — technology decision and system design (required before any source file).

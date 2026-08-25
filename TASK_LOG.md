@@ -522,3 +522,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS (full suite).
 - **Git commit:** `task: bump version to 0.1.1 (pyproject/package/PKGBUILD)`
 - **Next task:** final verification, tag v0.1.1, push.
+
+## Tasks 52-54 — Copy-paste install + complete removal
+- **Task:** User-requested: one-liner install and full deletion (package + deps + state) in the repo and documented.
+- **Files:** `install.sh`, `uninstall.sh`, `README.md`
+- **Purpose:** Frictionless install; safe complete uninstall that removes orphaned deps but never shared libraries still needed by other apps.
+- **Changes:** install.sh wraps makepkg -si with makepkg presence check; uninstall.sh handles both package names (cachecleaner/cache-cleaner), -Rns for orphan-dep removal, private state cleanup; README gains one-liner install + uninstall section with per-command explanation table.
+- **Tests:** bash -n on both scripts → OK; README structure re-checked (single launch line, headings intact); packaging regression suite unaffected.
+- **Errors:** README edit briefly duplicated the "Then launch" line and orphaned the dependencies paragraph — detected via grep and removed before commit.
+- **Resolution:** exact-context cleanup edit.
+- **Result:** committed.
+- **Git commit:** `task: add one-command install script`, `task: add complete-removal uninstall script`, `task: add copy-paste install and full-uninstall commands to README`
+- **Next task:** final push + deliver commands to user.

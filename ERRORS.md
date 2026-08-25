@@ -284,6 +284,12 @@ Error:   Downloaded body was an error page (archive generation lag ~10-30 s);
 Root cause: GitHub generates tag archives lazily; first GET returns 404/JSON
 Resolution: magic-byte (1f8b) verification loop before hashing; re-downloaded
          the real archive; set -e + pipeline failure stopped the bad commit
-Verification: final pinned sha equals a fresh download's sha256
+Verification: pinned sha a34a3f47… matches the magic-byte-verified real
+         archive (correct top dir + E-014 code present). NOTE: subsequent
+         re-downloads from this sandbox returned GitHub's 'Forbidden' HTML
+         error page (sha 31efc27e…, magic 0d0a) because the sandbox IP got
+         rate-limited on codeload — that page, not the archive, caused the
+         transient 'mismatch' reading. Users downloading normally get the
+         real archive whose sha equals the pinned one.
 Commit:  task: pin real sha256 of the v0.1.4 release tarball
 ```

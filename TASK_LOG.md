@@ -85,3 +85,25 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add unit tests for formatting helpers`
 - **Next task:** `cachecleaner/core/errors.py` — classified error types.
+
+## Task 8 — Classified error types
+- **Task:** Implement error classification (rule 12).
+- **File:** `cachecleaner/core/errors.py`
+- **Purpose:** Every scanner/cleaner error gets a kind, user-facing message, and loggable detail; never swallowed.
+- **Changes:** `ErrorKind` (10 kinds), `CleanError`, `classify()` mapping errno→kind, `user_message()`, `ErrorBucket` accumulator collapsing repeats.
+- **Tests:** run with Task 9's suite.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add classified error types and error bucket`
+- **Next task:** `tests/test_errors.py`.
+
+## Task 9 — Error classification tests
+- **Task:** Test errno→kind mapping, symlink distinction, bucket collapsing.
+- **File:** `tests/test_errors.py`
+- **Purpose:** Guarantee stable classification (UI text depends on it).
+- **Changes:** 16 test cases incl. parametrized message coverage for every kind.
+- **Tests:** `pytest tests/test_errors.py` → all passed.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add tests for error classification`
+- **Next task:** `cachecleaner/core/safety.py` — path validation & safety levels.

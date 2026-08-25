@@ -428,3 +428,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add README with install, usage and safety documentation`
 - **Next task:** final verification pass + version tag.
+
+## Task R1 — Record user-reported bugs
+- **Task:** Document E-010 (PKGBUILD mismatch) and E-011 (pacman elevation not wired) from the EndeavourOS install report.
+- **File:** `ERRORS.md`, `TASK_LOG.md`
+- **Purpose:** Rule 19 — every error recorded before fixing.
+- **Changes:** Two full error entries with root cause and planned resolution.
+- **Tests:** n/a
+- **Errors:** n/a
+- **Resolution:** n/a
+- **Result:** recorded.
+- **Git commit:** `task: record user-reported bugs E-010 and E-011`
+- **Next task:** fix `packaging/PKGBUILD`.

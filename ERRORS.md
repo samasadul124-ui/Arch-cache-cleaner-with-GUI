@@ -156,3 +156,50 @@ Verification: GUI smoke test now boots fully: 3 rows rendered, scan 'Ready',
          pip provider measured exactly 12_345 B
 Commit:  task: fix GUI API issues found by headless smoke test
 ```
+
+## E-010 — PKGBUILD source-directory mismatch breaks fresh makepkg build (USER-REPORTED)
+```
+Timestamp: 2026-08-25 (reported by user after install attempt on EndeavourOS)
+Task:    Task 41 — PKGBUILD fix
+File:    packaging/PKGBUILD
+Command: cd cache-cleaner/packaging && makepkg -si   (on EndeavourOS, Python 3.14)
+Error:   build() aborted: 'cd: cachecleaner-0.1.0: No such file or directory'
+Root cause: build()/package() used `cd "$pkgname-$pkgver"` with pkgname=cachecleaner,
+         but GitHub tag archives extract to <REPO>-<version> = cache-cleaner-0.1.0
+         (repo name has a hyphen; package name does not). Arch package name was
+         implicitly coupled to the upstream archive's directory name.
+Resolution: decouple: keep pkgname=cachecleaner; introduce _srcrepo=cache-cleaner
+         and `cd "$srcdir/$_srcrepo-$pkgver"` in build()/package(); source URL
+         renamed accordingly. Added provides/conflicts for the user's manually
+         renamed cache-cleaner package so pacman upgrades cleanly.
+Verification: tests/test_packaging.py asserts the cd-target matches the GitHub
+         extraction convention and all installed files exist; bash -n passes.
+         (makepkg itself cannot run in this Debian sandbox — user re-build
+         confirms; acceptance criteria quoted in the report.)
+Commit:  task: fix PKGBUILD source-directory coupling (E-010)
+```
+
+## E-011 — Pacman cache never cleaned: privilege escalation not wired (USER-REPORTED)
+```
+Timestamp: 2026-08-25 (reported by user after install on EndeavourOS)
+Task:    Tasks 43-49 — elevation wiring
+File:    cachecleaner/core/engine.py, providers/pkgman.py, gui/window.py, gui/provider_row.py
+Command: n/a (GUI workflow)
+Error:   Pacman cache provider was detected and measured, but cleaning it only
+         produced an INSUFFICIENT_PRIVILEGES skip — the app never triggered
+         polkit authentication, so /var/cache/pacman/pkg was never cleaned.
+Root cause: engine.clean() pre-skipped every provider flagged needs_elevation;
+         the existing cachecleaner-paccache helper + polkit policy were shipped
+         but never invoked by the application.
+Resolution: new core/elevation.py runs `pkexec /usr/bin/cachecleaner-paccache`
+         (polkit handles the password — the app never sees/stores it);
+         PacmanCacheProvider.clean() performs elevation, then re-measures the
+         directory and reports measured before/removed/after; cancelled (pkexec
+         rc 126 dismissed) vs authentication-failed are classified and surfaced;
+         GUI enables the pacman Clean button and the approval checkbox; engine no
+         longer pre-skips elevation providers.
+Verification: tests/test_elevation.py (fake pkexec: success/cancel/denied/helper
+         error), tests/test_providers.py pacman matrix, live sandbox re-test of
+         the helper, full suite + Xvfb GUI smoke.
+Commit:  tasks 43-49 series (see TASK_LOG)
+```

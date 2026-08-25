@@ -45,8 +45,15 @@ class TestPkgbuildBasics:
         text = _pkgbuild()
         assert _get(text, "pkgname") == "cachecleaner"
         m = re.search(r"^_srcrepo=(\S+)", text, re.M)
-        assert m and m.group(1) == "cache-cleaner", \
-            "_srcrepo must name the GitHub repo (hyphenated)"
+        assert m and m.group(1), "_srcrepo must be defined"
+        # _srcrepo must equal the repo named in the source URL — this is the
+        # invariant that matters (archives extract to <repo>-<version>), so it
+        # survives future repo renames without test edits
+        src = re.search(r'^source=\((.*)\)$', text, re.M).group(1)
+        src = src.replace("$url", _get(text, "url"))
+        url_m = re.search(r"github\.com/[^/]+/([^/]+)/archive/", src)
+        assert url_m and url_m.group(1) == m.group(1), \
+            "_srcrepo must name the GitHub repo used in the source URL"
 
 
 class TestSourceDirCoupling:

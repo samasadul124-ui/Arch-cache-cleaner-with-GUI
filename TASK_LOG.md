@@ -210,3 +210,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add package-manager cache providers`
 - **Next task:** `cachecleaner/providers/langtools.py`.
+
+## Task 19 — Language toolchain cache providers
+- **Task:** npm, pnpm, yarn, pip, Go, Cargo, rustup, ccache, Gradle, Maven.
+- **File:** `cachecleaner/providers/langtools.py`
+- **Purpose:** Cover dev-tool caches with graded safety (pip/npm/go SAFE; pnpm store/ccache/gradle/maven CONDITIONAL).
+- **Changes:** Declarative `_SimpleProvider` base; Cargo splits registry/cache (SAFE) vs registry/src (CONDITIONAL); `extra_cache_roots` hook for out-of-~/.cache locations.
+- **Tests:** py_compile → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add language toolchain cache providers`
+- **Next task:** `cachecleaner/providers/electron.py`.

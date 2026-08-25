@@ -464,3 +464,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS. (makepkg itself remains Arch-only; documented.)
 - **Git commit:** `task: add packaging regression tests (E-010)`
 - **Next task:** helper machine-readable output for elevation wiring.
+
+## Task 42a — Fix packaging-test shell expansion
+- **Task:** regression test compared unexpanded `$pkgname/$_srcrepo/$pkgver/$url` to literal values.
+- **File:** `tests/test_packaging.py`
+- **Purpose:** Make the E-010 regression test actually validate instead of false-failing.
+- **Changes:** substitute `$_srcrepo`, `$pkgver` and `$url` before asserting cd targets and the source-URL repo name.
+- **Tests:** `pytest tests/test_packaging.py` → all pass.
+- **Errors:** (a) cd targets compared without variable expansion; (b) source URL repo parsed before expanding `$url`; (c) a `| tail` pipe had masked pytest's nonzero exit earlier — re-ran without the masking pipe.
+- **Resolution:** variable substitution in assertions; clean re-run.
+- **Result:** PASS.
+- **Git commit:** `task: fix packaging test shell-variable expansion`
+- **Next task:** helper machine-readable output for elevation wiring.

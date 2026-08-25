@@ -166,3 +166,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add cache provider interface`
 - **Next task:** `cachecleaner/core/log.py` — structured logging.
+
+## Task 15 — Structured logging
+- **Task:** Implement rule-17 logging.
+- **File:** `cachecleaner/core/log.py`
+- **Purpose:** Full diagnostics to file (`$XDG_STATE_HOME/cachecleaner/cachecleaner.log`), concise console output; never logs file contents.
+- **Changes:** `setup_logging`, `get_logger`, `log_event` with key=value formatter and quote-escaping; file-open failure never crashes the app.
+- **Tests:** Inline: wrote events to tmp log; asserted `event=scan_start providers=17 mode=full` present and space-containing paths quoted.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add structured logging`
+- **Next task:** `cachecleaner/providers/__init__.py` — provider registry.

@@ -107,3 +107,27 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add tests for error classification`
 - **Next task:** `cachecleaner/core/safety.py` — path validation & safety levels.
+
+## Task 10 — Safe path validator
+- **Task:** Implement safety model core: SafetyLevel classification + PathSafety validator.
+- **File:** `cachecleaner/core/safety.py`
+- **Purpose:** Nothing may be deleted without passing validation (rules 5.3, 16).
+- **Changes:** `SafetyLevel` enum; `PathSafety.validate()` with empty/relative/traversal/dangerous-prefix/$HOME/shallow/denylist/root-containment/realpath-symlink-escape checks; `default_user_roots()`.
+- **Tests:** run via Task 11 suite.
+- **Errors:** Design conflict found during review — `"pacman"` in the name denylist would reject the legitimate allowed root `/var/cache/pacman/pkg`.
+- **Resolution:** Removed `pacman`/`local` from denylist; `/var/lib/pacman` remains protected by the `/var` dangerous-prefix rule and realpath containment.
+- **Result:** committed.
+- **Git commit:** `task: add safe path validator and safety levels`
+- **Next task:** `tests/test_safety.py`.
+
+## Task 11 — Path-validation safety tests
+- **Task:** Explicit rule-16 test matrix.
+- **File:** `tests/test_safety.py`
+- **Purpose:** Prove rejections for `/`, `/home`, `$HOME`, empty, `..`, system paths, denylisted names, symlink escapes; prove acceptance of valid cache paths incl. symlinked cache roots.
+- **Changes:** 30 test cases.
+- **Tests:** `pytest tests/test_safety.py` → 30 passed.
+- **Errors:** First draft of `test_shallow_path_rejected` built a path that was not actually shallow (deep tmp path) — fixed before commit to use `/opt/cache-root` (2 components).
+- **Resolution:** Test rewritten; suite green.
+- **Result:** PASS 30/30.
+- **Git commit:** `task: add path-validation safety test matrix`
+- **Next task:** `cachecleaner/core/fs.py` — streaming filesystem measurement & deletion.

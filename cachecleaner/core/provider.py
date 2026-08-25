@@ -91,6 +91,7 @@ class CacheProvider(ABC):
     def __init__(self, ctx: ProviderContext) -> None:
         self.ctx = ctx
         self._size_cache: Optional[SizeResult] = None
+        self._breakdown: tuple[int, int, int] = (0, 0, 0)
         self.last_size: int = 0
         self.detected: bool = False
 
@@ -118,21 +119,37 @@ class CacheProvider(ABC):
         return out
 
     def calculate_size(self, include_protected: bool = True) -> SizeResult:
-        """Measured bytes across existing paths. Cached until next scan."""
+        """Measured bytes across existing paths. Cached until next scan.
+
+        Also records a per-safety breakdown so the UI can show exactly which
+        share is cleanable without approval (E-014: never present a total the
+        Clean button cannot actually free).
+        """
         res = SizeResult()
+        safe_b = cond_b = prot_b = 0
         for cp in self.active_paths():
             if not cp.exists:
-                continue
-            if cp.safety is SafetyLevel.DO_NOT_DELETE and not include_protected:
                 continue
             part = dir_size(cp.path, errors=res.errors)
             res.bytes += part.bytes
             res.files += part.files
             res.dirs += part.dirs
             res.symlinks += part.symlinks
+            if cp.safety is SafetyLevel.SAFE_CACHE:
+                safe_b += part.bytes
+            elif cp.safety is SafetyLevel.CONDITIONAL_CACHE:
+                cond_b += part.bytes
+            else:
+                prot_b += part.bytes
+        self._breakdown = (safe_b, cond_b, prot_b)
         self._size_cache = res
         self.last_size = res.bytes
         return res
+
+    @property
+    def size_breakdown(self) -> tuple[int, int, int]:
+        """(safe_bytes, conditional_bytes, protected_bytes) from last scan."""
+        return self._breakdown
 
     def clean(
         self,

@@ -199,3 +199,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add browser cache providers (Firefox + Chromium family)`
 - **Next task:** `cachecleaner/providers/pkgman.py`.
+
+## Task 18 — Package-manager cache providers
+- **Task:** pacman, yay, paru, flatpak providers.
+- **File:** `cachecleaner/providers/pkgman.py`
+- **Purpose:** Cover Arch package caches with correct safety/elevation semantics.
+- **Changes:** pacman → CONDITIONAL_CACHE + `needs_elevation()` + paccache advice; yay/paru SAFE; flatpak CONDITIONAL with `flatpak uninstall --unused` guidance.
+- **Tests:** py_compile → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add package-manager cache providers`
+- **Next task:** `cachecleaner/providers/langtools.py`.

@@ -32,7 +32,7 @@ fi
 if [ "$removed_any" -eq 1 ]; then
   echo
   echo "✔ Cache Cleaner fully removed."
-  echo "  Optional: delete the cloned sources, e.g.  rm -rf ~/cache-cleaner"
+  echo "  Optional: delete the cloned sources, e.g.  rm -rf ~/Arch-cache-cleaner-with-GUI"
 else
   echo "Cache Cleaner package not found — only state cleaned up (if present)."
 fi

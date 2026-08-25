@@ -44,7 +44,15 @@ class ProviderRow(Gtk.ListBoxRow):
         sub.add_css_class("cc-subtle")
         left.append(name)
         left.append(sub)
-        if p.safety is SafetyLevel.CONDITIONAL_CACHE:
+        # E-014: be honest about what a plain Clean click can free
+        if scan.conditional_bytes > 0:
+            tip = Gtk.Label(
+                label=f"{format_bytes(scan.eligible_bytes)} cleanable now  ·  "
+                      f"{format_bytes(scan.conditional_bytes)} needs explicit approval")
+            tip.set_halign(Gtk.Align.START)
+            tip.add_css_class("caption")
+            left.append(tip)
+        elif p.safety is SafetyLevel.CONDITIONAL_CACHE:
             tip = Gtk.Label(label="Conditional — requires explicit approval below")
             tip.set_halign(Gtk.Align.START)
             tip.add_css_class("caption")
@@ -57,9 +65,10 @@ class ProviderRow(Gtk.ListBoxRow):
         box.append(size)
 
         self.approve: Optional[Gtk.CheckButton] = None
-        if p.safety is SafetyLevel.CONDITIONAL_CACHE and interactive:
+        if scan.conditional_bytes > 0 and interactive:
             self.approve = Gtk.CheckButton(label="Include")
-            self.approve.set_tooltip_text(p.explain())
+            self.approve.set_tooltip_text(
+                "Also remove the approval-requiring part: " + p.explain())
             box.append(self.approve)
 
         if interactive:

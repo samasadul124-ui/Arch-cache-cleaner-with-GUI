@@ -208,28 +208,25 @@ class Engine:
                 out.cancelled = True
                 log.log_event(_logger, "clean_cancelled", at_provider=p.id)
                 break
+            # E-011: providers that need elevation (e.g. pacman cache) trigger
+            # the polkit dialog themselves inside clean(); the engine no
+            # longer pre-skips them.
             if s.needs_elevation:
-                # isolated privileged work is delegated elsewhere; never here
-                r = ProviderCleanResult(provider_id=p.id, attempted=False)
-                r.errors.add(ErrorKind.INSUFFICIENT_PRIVILEGES, p.id, p.id,
-                             "requires the privileged helper")
-                out.per_provider.append(r)
                 log.log_event(_logger, "provider_needs_elevation", id=p.id)
-            else:
-                if progress:
-                    progress(i / total, f"Cleaning {p.name}…")
-                try:
-                    r = p.clean(dry_run=dry_run, cancel=cancel,
-                                include_conditional=p.id in include_conditional)
-                except Exception as exc:
-                    r = ProviderCleanResult(provider_id=p.id, attempted=True)
-                    r.errors.add(ErrorKind.PROVIDER_FAILURE, p.id, p.id, str(exc))
-                    log.log_event(_logger, "provider_clean_failed", id=p.id,
-                                  error=str(exc), level=40)
-                out.per_provider.append(r)
-                log.log_event(_logger, "provider_cleaned", id=p.id,
-                              freed=r.bytes_freed, paths=r.cleaned_paths,
-                              skipped=r.skipped_paths, errors=len(r.errors))
+            if progress:
+                progress(i / total, f"Cleaning {p.name}…")
+            try:
+                r = p.clean(dry_run=dry_run, cancel=cancel,
+                            include_conditional=p.id in include_conditional)
+            except Exception as exc:
+                r = ProviderCleanResult(provider_id=p.id, attempted=True)
+                r.errors.add(ErrorKind.PROVIDER_FAILURE, p.id, p.id, str(exc))
+                log.log_event(_logger, "provider_clean_failed", id=p.id,
+                              error=str(exc), level=40)
+            out.per_provider.append(r)
+            log.log_event(_logger, "provider_cleaned", id=p.id,
+                          freed=r.bytes_freed, paths=r.cleaned_paths,
+                          skipped=r.skipped_paths, errors=len(r.errors))
             for rec in out.per_provider[-1].errors.records:
                 out.errors.records.append(rec)
 

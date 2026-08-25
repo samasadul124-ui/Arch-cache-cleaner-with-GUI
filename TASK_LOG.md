@@ -336,3 +336,16 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** compiled.
 - **Git commit:** `task: add GTK4/libadwaita GUI (app, window, provider rows, results panel)`
 - **Next task:** `tests/gui_smoke.py` + run under Xvfb.
+
+## Task 33 — Headless GUI smoke test
+- **Task:** Boot the real GUI under Xvfb against a synthetic home and verify dashboard/list populate.
+- **File:** `tests/gui_smoke.py`
+- **Purpose:** "UI works" must be tested, not assumed (rule 25) — despite no physical display.
+- **Changes:** Smoke script: fixture home → real app.run → poll until scan done → assert rows/total/label, pip provider measured exactly 12 345 B.
+- **Tests:** `xvfb-run -a /usr/bin/python3 tests/gui_smoke.py` → GUI SMOKE TEST PASS (rc=0, 3 rows, state Ready).
+- **Errors:** E-007 (set_application_name), E-008 (Gtk.SimpleAction), E-009 (set_titlebar on Adw window) — all found by this test and fixed.
+- **Resolution:** GLib app-name property, Gio.SimpleAction, Adw.ToolbarView.
+- **Note:** GTK itself creates ~/.cache/fontconfig during window init — the app legitimately detected it (total 1.3 MiB); assertion therefore checks the exact pip measurement instead of the machine-state-dependent total.
+- **Result:** PASS.
+- **Git commit:** `task: GUI smoke test passing under Xvfb`
+- **Next task:** `data/cachecleaner.desktop` — launcher integration.

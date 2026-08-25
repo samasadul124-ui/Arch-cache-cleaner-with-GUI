@@ -112,3 +112,47 @@ Resolution: rewrite: recreate the file in the progress callback at the
 Verification: test now asserts measured after_bytes == 7_000; passes
 Commit:  task: add engine integration tests (12 scenarios)
 ```
+
+## E-007 — Adw.Application has no set_application_name/set_version
+```
+Timestamp: 2026-08-25 ~06:55 UTC
+Task:    Task 33 — GUI smoke test
+File:    cachecleaner/gui/app.py
+Command: xvfb-run -a python3 tests/gui_smoke.py
+Error:   AttributeError: 'CacheCleanerApp' object has no attribute 'set_application_name'
+Root cause: those setters belong to Gtk.AboutDialog, not Gio.Application;
+         app-level name is a GLib process property
+Resolution: GLib.set_application_name(APP_NAME); version passed directly to
+         Adw.AboutWindow; unused __version__ import dropped
+Verification: smoke test progressed past app construction
+Commit:  task: fix GUI API issues found by headless smoke test
+```
+
+## E-008 — Gtk.SimpleAction does not exist
+```
+Timestamp: 2026-08-25 ~06:56 UTC
+Task:    Task 33 — GUI smoke test
+File:    cachecleaner/gui/window.py
+Command: xvfb-run -a python3 tests/gui_smoke.py
+Error:   AttributeError: 'gi.repository.Gtk' object has no attribute 'SimpleAction'
+Root cause: actions live in Gio, not Gtk
+Resolution: Gio.SimpleAction.new("about", None)
+Verification: window construction passed; smoke test progressed
+Commit:  task: fix GUI API issues found by headless smoke test
+```
+
+## E-009 — gtk_window_set_titlebar unsupported on AdwApplicationWindow
+```
+Timestamp: 2026-08-25 ~06:57 UTC
+Task:    Task 33 — GUI smoke test
+File:    cachecleaner/gui/window.py
+Command: xvfb-run -a python3 tests/gui_smoke.py
+Error:   Adwaita-ERROR: gtk_window_set_titlebar() is not supported for
+         AdwApplicationWindow → trap
+Root cause: libadwaita windows use Adw.ToolbarView for header bars
+Resolution: Adw.ToolbarView with add_top_bar(header) and scrolled content via
+         set_content; window.set_content(toolbar_view)
+Verification: GUI smoke test now boots fully: 3 rows rendered, scan 'Ready',
+         pip provider measured exactly 12_345 B
+Commit:  task: fix GUI API issues found by headless smoke test
+```

@@ -290,3 +290,37 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS (117 total).
 - **Git commit:** `task: add engine integration tests (12 scenarios)`
 - **Next task:** `cachecleaner/cli.py` — headless CLI (scan/clean/dry-run/JSON).
+
+## Task 26 — Headless CLI
+- **Task:** CLI over the engine: `--scan`, `--dry-run`, `--clean`, `--json`, `--providers`, `--include-conditional`, `--home`, `--yes`.
+- **File:** `cachecleaner/cli.py`
+- **Purpose:** Production headless mode + the means to exercise the full pipeline in this sandbox; JSON mode for scripting.
+- **Changes:** argparse front-end, human + JSON printers, confirmation prompt, exit codes (0 ok / 1 partial / 2 fatal / 130 cancelled).
+- **Tests:** run via Task 28.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add headless CLI with scan/dry-run/clean and JSON reports`
+- **Next task:** `cachecleaner/__main__.py`.
+
+## Task 27 — Entry point
+- **Task:** `python -m cachecleaner` dispatcher.
+- **File:** `cachecleaner/__main__.py`
+- **Purpose:** GUI by default; CLI when flags given, no display, or GTK missing.
+- **Changes:** Graceful fallback chain with informative messages.
+- **Tests:** headless sandbox run `python -m cachecleaner --scan` → exit 0, report rendered (0 providers — verified correct: sandbox ~/.cache is empty and ~/.npm absent; pre-fix smoke-test detections came from the removed which() fallback).
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add entry point with GUI/CLI dispatch`
+- **Next task:** `tests/test_cli.py`.
+
+## Task 28 — End-to-end CLI tests
+- **Task:** CLI integration matrix on isolated homes.
+- **File:** `tests/test_cli.py`
+- **Purpose:** Prove scan/JSON/dry-run/clean/subset/abort/version paths.
+- **Changes:** 7 tests.
+- **Tests:** 7 passed; full suite 124 green.
+- **Errors:** First draft asserted "15.0 KiB" for 15 000 B — wrong binary-unit arithmetic (14.6 KiB); corrected before commit.
+- **Resolution:** expectation fixed.
+- **Result:** PASS (124 total).
+- **Git commit:** `task: add end-to-end CLI tests`
+- **Next task:** `cachecleaner/gui/__init__.py` — GUI subpackage (lazy GTK imports).

@@ -440,3 +440,27 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** recorded.
 - **Git commit:** `task: record user-reported bugs E-010 and E-011`
 - **Next task:** fix `packaging/PKGBUILD`.
+
+## Task 41 — PKGBUILD fix (E-010, user-reported)
+- **Task:** Decouple Arch package name from the GitHub archive directory.
+- **File:** `packaging/PKGBUILD`
+- **Purpose:** Fresh `makepkg -si` must work without manual edits (acceptance criteria §12).
+- **Changes:** `_srcrepo=cache-cleaner`; `cd "$srcdir/$_srcrepo-$pkgver"` in build()/package(); source renamed; `provides/conflicts` so the user's manually-renamed `cache-cleaner` package is replaced cleanly; pkgrel=2.
+- **Tests:** Task 42 suite + live simulation: downloaded the REAL v0.1.0 tag archive and confirmed its top-level dir is `cache-cleaner-0.1.0`, matching the new cd-target.
+- **Errors:** E-010 (root cause: implicit `$pkgname-$pkgver` coupling).
+- **Resolution:** explicit srcdir-based cd; regression-guarded by tests.
+- **Result:** PASS.
+- **Git commit:** `task: fix PKGBUILD source-directory coupling (E-010)`
+- **Next task:** packaging regression tests.
+
+## Task 42 — Packaging regression tests
+- **Task:** Prevent E-010 from returning (report §9).
+- **File:** `tests/test_packaging.py`
+- **Purpose:** Verify syntax, version coupling, srcrepo/URL/cd consistency, anti-pattern absence, installed-file presence.
+- **Changes:** 8 tests incl. explicit `cd "$pkgname-$pkgver"` ban.
+- **Tests:** all pass; plus live archive-extraction simulation against GitHub.
+- **Errors:** None.
+- **Resolution:** n/a
+- **Result:** PASS. (makepkg itself remains Arch-only; documented.)
+- **Git commit:** `task: add packaging regression tests (E-010)`
+- **Next task:** helper machine-readable output for elevation wiring.

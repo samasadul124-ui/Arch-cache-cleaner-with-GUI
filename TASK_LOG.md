@@ -324,3 +324,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS (124 total).
 - **Git commit:** `task: add end-to-end CLI tests`
 - **Next task:** `cachecleaner/gui/__init__.py` — GUI subpackage (lazy GTK imports).
+
+## Task 29-32 — GUI layer (app/window/rows/results)
+- **Task:** Build the GTK4 + libadwaita interface (rule 1, 11).
+- **Files:** `cachecleaner/gui/__init__.py`, `gui/app.py`, `gui/provider_row.py`, `gui/results.py`, `gui/window.py`
+- **Purpose:** Modern native UI: dashboard (total size prominent), provider cards, Clean All (destructive, with confirmation), per-provider clean, progress, results (before/removed/remaining/cleaned/skipped/errors), rescan, About. States: scanning/ready/cleaning/finished/partial/fatal.
+- **Changes:** `Adw.Application` + CSS theme; threaded scan/clean with `GLib.idle_add`; cancel button; conditional-approval checkboxes; results card auto-shown; automatic post-clean rescan; About window.
+- **Tests:** py_compile (all 5 modules) → OK; headless runtime test in Task 33.
+- **Errors:** Removed a hacky Gdk import and simplified results-child clearing before commit.
+- **Resolution:** clean imports.
+- **Result:** compiled.
+- **Git commit:** `task: add GTK4/libadwaita GUI (app, window, provider rows, results panel)`
+- **Next task:** `tests/gui_smoke.py` + run under Xvfb.

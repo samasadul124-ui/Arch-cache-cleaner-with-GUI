@@ -232,3 +232,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: add Electron app cache providers with Telegram exclusion`
 - **Next task:** `cachecleaner/providers/__init__.py` — provider registry.
+
+## Task 21 — Provider registry
+- **Task:** Central registry + instantiation/detection entry points.
+- **File:** `cachecleaner/providers/__init__.py`
+- **Purpose:** Engine and UI consume providers through one list; adding providers needs no engine/UI changes.
+- **Changes:** `PROVIDER_CLASSES` (28 classes), `instantiate_all`, `detect_all` with per-provider OSError guard.
+- **Tests:** (1) sandbox run → 28 unique IDs, detection executes read-only; (2) synthetic home fixture with fake Firefox/Chrome/VS Code/npm/thumbnail caches → all 5 expected providers detected.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add provider registry`
+- **Next task:** `tests/test_providers.py` — provider safety + detection matrix.

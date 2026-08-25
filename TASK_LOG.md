@@ -155,3 +155,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS 19/19.
 - **Git commit:** `task: add filesystem engine tests (19 cases)`
 - **Next task:** `cachecleaner/core/provider.py` — CacheProvider interface + result types.
+
+## Task 14 — CacheProvider interface
+- **Task:** Define provider architecture (rule 3): id/name/category/detect/cache_paths/calculate_size/clean/verify/explain + shared context.
+- **File:** `cachecleaner/core/provider.py`
+- **Purpose:** New cache sources plug in without UI/engine changes; defaults implement measurement/cleaning on top of validated fs primitives.
+- **Changes:** `Category`, `CachePath`, `ProviderContext`, `ProviderCleanResult`, abstract `CacheProvider` with default size/clean/verify; per-path error isolation; conditional paths only cleaned on approval.
+- **Tests:** py_compile + behavioural smoke: fake provider on tmp fixtures — size 2277 B measured, clean freed exactly 1500 B (eligible path), DO_NOT_DELETE path (777 B) untouched, verify() reports 777 B remaining.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** PASS.
+- **Git commit:** `task: add cache provider interface`
+- **Next task:** `cachecleaner/core/log.py` — structured logging.

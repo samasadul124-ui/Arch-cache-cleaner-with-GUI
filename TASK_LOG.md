@@ -393,3 +393,27 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS (helper behaviour verified end-to-end).
 - **Git commit:** `task: add isolated privileged pacman-cache helper and polkit policy`
 - **Next task:** `README.md`.
+
+## Task 38 — Benchmark harnesses
+- **Task:** Reproducible performance tooling (rules 8, 23).
+- **Files:** `tools/bench_cli.py`, `tools/bench_gui_idle.py`
+- **Purpose:** Measure, don't guess: engine scan/clean throughput + RSS; GUI startup + idle RSS.
+- **Changes:** Synthetic-tree engine bench with correctness asserts; GUI idle bench reading /proc VmRSS after settle.
+- **Tests:** engine bench: 15 000 files / 117 MiB → scan 0.05 s (294k files/s), clean 0.12 s (130k files/s), RSS +0.6 MiB; GUI: startup 1.10 s, idle 212 MiB vs bare-GTK baseline 177 MiB (≈35 MiB app overhead); CLI startup 69–70 ms.
+- **Errors:** `/usr/bin/time` not installed in sandbox — replaced with Python subprocess timing (no impact on results).
+- **Resolution:** timed via `time.perf_counter()` around subprocess runs.
+- **Result:** committed.
+- **Git commit:** `task: add reproducible engine benchmark harness`, `task: add GUI idle/startup benchmark`
+- **Next task:** `PERFORMANCE.md`.
+
+## Task 39 — Performance documentation
+- **Task:** Record all measurements against the <50 MB target and RAM goals.
+- **File:** `PERFORMANCE.md`
+- **Purpose:** Rule 23 reporting; honest attribution of GUI RAM to the toolkit.
+- **Changes:** Full measurement tables + reproduction commands + interpretation.
+- **Tests:** numbers cross-checked against bench outputs above.
+- **Errors:** First `du` included `__pycache__` (266 KiB) — re-measured excluding caches → 100.9 KiB real payload.
+- **Resolution:** excluded bytecode caches from the measurement.
+- **Result:** committed.
+- **Git commit:** `task: document measured performance numbers`
+- **Next task:** `README.md`.

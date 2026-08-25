@@ -60,19 +60,47 @@ keep the 2 newest versions of every package instead (downgrade safety):
 
 ## Install (EndeavourOS / Arch)
 
+**One-liner — copy & paste:**
+
+```bash
+git clone https://github.com/samasadul124-ui/cache-cleaner && cd cache-cleaner && ./install.sh
+```
+
+Or manually:
+
 ```bash
 git clone https://github.com/samasadul124-ui/cache-cleaner
 cd cache-cleaner/packaging
 makepkg -si          # builds cachecleaner-0.1.1-any.pkg.tar.zst and installs
 ```
 
-> v0.1.1 fixes a fresh-install build failure (E-010: the PKGBUILD now
-> resolves the GitHub archive's `cache-cleaner-<version>` source directory
-> independently of the package name) and wires real polkit privilege
-> escalation for the pacman cache (E-011).
-
 Then launch **"Cache Cleaner"** from your application menu, or run
 `cachecleaner`.
+
+## Uninstall — complete removal
+
+**One-liner — copy & paste** (from anywhere):
+
+```bash
+sudo pacman -Rns cachecleaner && rm -rf ~/.local/state/cachecleaner && rm -rf ~/cache-cleaner
+```
+
+What each part does:
+
+| Command | Removes |
+|---|---|
+| `sudo pacman -Rns cachecleaner` | the app **plus every dependency nothing else needs** and its config files |
+| `rm -rf ~/.local/state/cachecleaner` | the app's private logs/state |
+| `rm -rf ~/cache-cleaner` | the cloned source folder (adjust the path if you cloned elsewhere) |
+
+Notes:
+
+* `-Rns` only removes dependencies that **no other package requires** —
+  shared libraries used by other apps (`gtk4`, `libadwaita`,
+  `python-gobject`, `polkit`, …) are kept automatically by pacman.
+* If you installed the manually-renamed `cache-cleaner` package instead,
+  use: `sudo pacman -Rns cache-cleaner`
+* Or run the bundled script from a cloned repo: `./uninstall.sh`
 
 Dependencies (all from the official repos): `python`, `python-gobject`,
 `gtk4`, `libadwaita`, `hicolor-icon-theme`. Optional: `polkit` (pacman-cache

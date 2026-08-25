@@ -243,3 +243,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add provider registry`
 - **Next task:** `tests/test_providers.py` — provider safety + detection matrix.
+
+## Task 22 — Provider safety & detection tests
+- **Task:** Prove providers never list profile/credential/session data; cleaning frees only caches; detection matrix.
+- **File:** `tests/test_providers.py`
+- **Purpose:** Safety boundary is the core promise of the app — needs its own tests.
+- **Changes:** 11 tests: Firefox cache2-only targeting + profile data survival; Chromium Cache/Code Cache/GPUCache-only; Telegram excluded from generic Electron scan; VS Code workspaceStorage CONDITIONAL gating; layered fixture detection; empty-fixture detection.
+- **Tests:** after fixes (E-002/E-003) → full suite 105 passed.
+- **Errors:** E-002 (which()-based detection noise), E-003 (expanduser env leak), E-004 (expected refusal; engine requirement captured) — all in `ERRORS.md`.
+- **Resolution:** detect() requires existing cache dir; paths anchor on ctx.home; test mirrors engine allowlist behaviour.
+- **Result:** PASS (105 total).
+- **Git commit:** `task: add provider safety and detection tests`
+- **Next task:** `cachecleaner/core/discovery.py` — layered software discovery + dynamic "other caches".

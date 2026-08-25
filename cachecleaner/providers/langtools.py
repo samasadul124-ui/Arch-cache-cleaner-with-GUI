@@ -33,12 +33,14 @@ class _SimpleProvider(CacheProvider):
     category = Category.LANGUAGE_TOOL
 
     def _path(self) -> str:
-        return self.ctx.expand(os.path.join("~", self.relpath))
+        # IMPORTANT: anchor on ctx.home, never expanduser("~") (env $HOME),
+        # so context overrides (tests, --root) are respected.
+        return os.path.normpath(os.path.join(self.ctx.home, self.relpath))
 
     def detect(self) -> bool:
-        if os.path.isdir(self._path()):
-            return True
-        return bool(self.binary) and self.ctx.which(self.binary)
+        # detect() == "a cache actually exists"; installed-but-cacheless tools
+        # stay hidden to avoid 0-byte noise in the UI.
+        return os.path.isdir(self._path())
 
     def cache_paths(self) -> list[CachePath]:
         p = self._path()
@@ -93,8 +95,7 @@ class CargoProvider(CacheProvider):
     extra_cache_roots = ("~/.cargo/registry/cache",)
 
     def detect(self) -> bool:
-        return os.path.isdir(os.path.join(self.ctx.home, ".cargo", "registry")) \
-            or self.ctx.which("cargo")
+        return os.path.isdir(os.path.join(self.ctx.home, ".cargo", "registry"))
 
     def cache_paths(self) -> list[CachePath]:
         reg = os.path.join(self.ctx.home, ".cargo", "registry")

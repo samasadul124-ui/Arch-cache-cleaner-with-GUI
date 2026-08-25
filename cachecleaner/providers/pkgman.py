@@ -57,7 +57,7 @@ class _AurHelperProvider(CacheProvider):
         return os.path.join(self.ctx.xdg_cache, self.cache_subdir)
 
     def detect(self) -> bool:
-        return os.path.isdir(self._root()) or self.ctx.which(self.binary)
+        return os.path.isdir(self._root())
 
     def cache_paths(self) -> list[CachePath]:
         if os.path.isdir(self._root()):
@@ -90,7 +90,7 @@ class FlatpakProvider(CacheProvider):
     safety = SafetyLevel.CONDITIONAL_CACHE
 
     def detect(self) -> bool:
-        return self.ctx.which("flatpak")
+        return os.path.isdir(os.path.join(self.ctx.xdg_cache, "flatpak"))
 
     def cache_paths(self) -> list[CachePath]:
         paths = []

@@ -417,3 +417,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** `task: document measured performance numbers`
 - **Next task:** `README.md`.
+
+## Task 40 — README
+- **Task:** User-facing documentation.
+- **File:** `README.md`
+- **Purpose:** Install (makepkg on Arch), dev-run, CLI usage, safety model, tests, status.
+- **Changes:** Complete README with honest note that .pkg.tar.zst must be built on Arch.
+- **Tests:** n/a (docs).
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add README with install, usage and safety documentation`
+- **Next task:** final verification pass + version tag.

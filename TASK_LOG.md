@@ -570,3 +570,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** pushed.
 - **Git commit:** `task: pin real sha256 of the v0.1.3 release tarball`
 - **Next task:** final verification + status report.
+
+## Task 63 — Install-path fixes after repo rename (user-reported confusion)
+- **Task:** User hit: "target not found: cachecleaner", "destination path already exists", "cd: cache-cleaner/packaging: No such file".
+- **File:** `README.md`, `uninstall.sh`
+- **Purpose:** Correct every stale `cache-cleaner` path left over after the rename; make copy-paste one-liners robust to already-uninstalled / already-cloned states.
+- **Changes:** manual step now `cd Arch-cache-cleaner-with-GUI/packaging`; install one-liner idempotent (`rm -rf` stale clone first); uninstall one-liner uses `;` so a missing package no longer aborts cleanup; folder paths updated in table + uninstall.sh hint.
+- **Tests:** grep confirms zero stale paths remain; bash -n on uninstall.sh.
+- **Errors:** Root causes explained to user: package was already uninstalled (hence pacman 'target not found' — not a failure), clone dir already existed from an earlier attempt, and `&&` chaining aborted cleanup when pacman had nothing to remove.
+- **Resolution:** idempotent commands shipped on main (no version bump needed — shipped package unchanged, v0.1.3 sha pin still valid).
+- **Result:** pushed.
+- **Git commit:** `task: fix stale clone-folder paths and make one-liners idempotent`, `task: uninstall script references renamed clone folder`
+- **Next task:** deliver working commands to user.

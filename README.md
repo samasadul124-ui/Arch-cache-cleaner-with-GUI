@@ -63,13 +63,13 @@ keep the 2 newest versions of every package instead (downgrade safety):
 **One-liner — copy & paste:**
 
 ```bash
-git clone https://github.com/samasadul124-ui/cache-cleaner && cd cache-cleaner && ./install.sh
+git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI && cd cache-cleaner && ./install.sh
 ```
 
 Or manually:
 
 ```bash
-git clone https://github.com/samasadul124-ui/cache-cleaner
+git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
 cd cache-cleaner/packaging
 makepkg -si          # builds cachecleaner-0.1.2-any.pkg.tar.zst and installs
 ```

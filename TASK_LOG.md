@@ -349,3 +349,25 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: GUI smoke test passing under Xvfb`
 - **Next task:** `data/cachecleaner.desktop` — launcher integration.
+
+## Task 34 — Desktop launcher
+- **Task:** `.desktop` file for menu integration (rule 10).
+- **File:** `data/cachecleaner.desktop`
+- **Purpose:** App must appear in the desktop launcher with icon, categories, keywords.
+- **Changes:** Desktop Entry 1.5 with Name/Comment(+de)/Exec/Icon/Categories/Keywords.
+- **Tests:** Key-presence check (Type/Name/Exec/Icon/Categories/Terminal) → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add desktop launcher entry`
+- **Next task:** icon.
+
+## Task 35 — Application icon
+- **Task:** Scalable SVG app icon.
+- **File:** `data/icons/hicolor/scalable/apps/cachecleaner.svg`
+- **Purpose:** Icon for launcher/About window; hicolor install path.
+- **Changes:** Hand-drawn SVG: Adwaita-blue rounded square, cache cylinder, cleaning spark, green safety check.
+- **Tests:** XML well-formedness → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add scalable application icon`
+- **Next task:** `packaging/PKGBUILD`.

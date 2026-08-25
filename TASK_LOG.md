@@ -177,3 +177,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** PASS.
 - **Git commit:** `task: add structured logging`
 - **Next task:** `cachecleaner/providers/__init__.py` — provider registry.
+
+## Task 16 — XDG desktop cache providers
+- **Task:** First provider module: thumbnails, fontconfig, Mesa shader cache, KDE sycoca.
+- **File:** `cachecleaner/providers/xdg.py`
+- **Purpose:** Cover classic regenerable desktop caches; document trash exclusion (not cache → out of scope).
+- **Changes:** 4 provider classes, all SAFE_CACHE, detection via paths/binaries, UI explanations.
+- **Tests:** py_compile + import check → OK.
+- **Errors:** None. **Resolution:** n/a
+- **Result:** committed.
+- **Git commit:** `task: add XDG desktop cache providers`
+- **Next task:** `cachecleaner/providers/browsers.py`.

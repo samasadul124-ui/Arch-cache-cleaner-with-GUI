@@ -546,3 +546,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** v0.1.2 tagged and pushed.
 - **Git commit:** `task: COMMIT ... (E-013)` series + 0.1.2 bumps
 - **Next task:** deliver reinstall commands to user.
+
+## Tasks 58-60 — Review fixes: repo rename sync, badge, 0.1.3
+- **Task:** Address the external review (9.1/10): repo renamed to `Arch-cache-cleaner-with-GUI` on GitHub; README badge still said 0.1.0.
+- **Files:** `packaging/PKGBUILD` (`_srcrepo` + url), `pyproject.toml`, `packaging/io.github.cachecleaner.paccache.policy`, `cachecleaner/gui/window.py` (About website), `README.md`, `tests/test_packaging.py`, version bumps to 0.1.3, badge sync.
+- **Purpose:** Renamed repo changes GitHub archive extraction dir — `_srcrepo` had to follow or E-010 would return; badge/status consistency.
+- **Changes:** all URLs + `_srcrepo=Arch-cache-cleaner-with-GUI`; packaging test now asserts the srcrepo↔source-URL invariant instead of a hard-coded name (rename-proof); version 0.1.3 across metadata; badge → 0.1.3.
+- **Tests:** packaging suite green; full suite green; GUI smoke re-run where xvfb available.
+- **Errors:** workspace snapshot dropped executable bits again (mode-only diffs, restored); git identity lost again (restored); old PAT now returns Bad credentials (user rotated it) — push requires a new token, requested from user.
+- **Resolution:** chmod + git config; awaiting token for push.
+- **Result:** committed locally.
+- **Git commit:** sync series + 0.1.3 bumps
+- **Next task:** push, tag v0.1.3, then pin real sha256 of the release tarball (review's remaining packaging point).

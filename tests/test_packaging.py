@@ -58,8 +58,10 @@ class TestSourceDirCoupling:
         pkgver = _get(text, "pkgver")
         # GitHub archives extract to <repo>-<version>
         github_dir = f"{srcrepo}-{pkgver}"
-        # repo name in the source URL must equal _srcrepo
+        # repo name in the source URL must equal _srcrepo ($url expanded)
         src_line = re.search(r'^source=\((.*)\)$', text, re.M).group(1)
+        src_line = src_line.replace("$url", _get(text, "url")) \
+                           .replace("$pkgver", pkgver)
         url_m = re.search(r"/([^/]+)/archive/refs/tags/", src_line)
         assert url_m and url_m.group(1) == srcrepo, \
             "source URL repo must equal _srcrepo"
@@ -67,8 +69,9 @@ class TestSourceDirCoupling:
         cds = re.findall(r'cd "([^"]+)"', text)
         assert cds, "PKGBUILD has no cd statements?"
         for cd in cds:
-            assert cd == f"$srcdir/{github_dir}", \
-                f"cd {cd!r} does not target $srcdir/{github_dir}"
+            expanded = cd.replace("$_srcrepo", srcrepo).replace("$pkgver", pkgver)
+            assert expanded == f"$srcdir/{github_dir}", \
+                f"cd {cd!r} resolves to {expanded!r}, not $srcdir/{github_dir}"
 
     def test_no_pkgname_coupled_cd(self):
         # the exact E-010 anti-pattern must never return

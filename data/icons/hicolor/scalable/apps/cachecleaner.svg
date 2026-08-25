@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3584e4"/>
+      <stop offset="1" stop-color="#1c5fb4"/>
+    </linearGradient>
+    <linearGradient id="cyl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d3e2f2"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9f06b"/>
+      <stop offset="1" stop-color="#f5c211"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded-square background -->
+  <rect x="4" y="4" width="120" height="120" rx="28" ry="28" fill="url(#bg)"/>
+  <rect x="4" y="4" width="120" height="120" rx="28" ry="28" fill="none"
+        stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+
+  <!-- cache cylinder (stacked platters) -->
+  <g>
+    <ellipse cx="56" cy="84" rx="26" ry="10" fill="#a5c6e8"/>
+    <rect x="30" y="46" width="52" height="38" fill="url(#cyl)"/>
+    <ellipse cx="56" cy="46" rx="26" ry="10" fill="#ffffff"/>
+    <ellipse cx="56" cy="58" rx="26" ry="10" fill="none" stroke="#9db9d8" stroke-width="2.5"/>
+    <ellipse cx="56" cy="70" rx="26" ry="10" fill="none" stroke="#9db9d8" stroke-width="2.5"/>
+    <rect x="30" y="46" width="52" height="38" fill="none" stroke="#7fa2c6" stroke-width="2"/>
+    <ellipse cx="56" cy="46" rx="26" ry="10" fill="none" stroke="#7fa2c6" stroke-width="2"/>
+  </g>
+
+  <!-- cleaning spark / sweep -->
+  <g transform="rotate(-8 96 40)">
+    <path fill="url(#spark)" d="M96 18 L101 34 L118 40 L101 46 L96 62 L91 46 L74 40 L91 34 Z"/>
+    <circle cx="112" cy="22" r="4" fill="#f9f06b"/>
+    <circle cx="80" cy="60" r="3" fill="#f9f06b"/>
+  </g>
+
+  <!-- checkmark: safe / verified -->
+  <circle cx="92" cy="92" r="20" fill="#26a269"/>
+  <path d="M83 92 L89 98 L101 85" fill="none" stroke="#ffffff"
+        stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

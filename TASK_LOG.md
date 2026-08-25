@@ -558,3 +558,15 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed locally.
 - **Git commit:** sync series + 0.1.3 bumps
 - **Next task:** push, tag v0.1.3, then pin real sha256 of the release tarball (review's remaining packaging point).
+
+## Tasks 61-62 — Release v0.1.3: push, sha256 pinning (review point)
+- **Task:** Push renamed-repo sync + badge fix; close the review's remaining packaging point (`sha256sums=('SKIP')`).
+- **File:** `packaging/PKGBUILD`
+- **Purpose:** Supply-chain integrity: makepkg must validate the source tarball against a real checksum.
+- **Changes:** pinned `25ca0c40…42658e`, the sha256 of the official v0.1.3 tag tarball, computed from the actual download; documented the per-release pinning workflow in a comment.
+- **Tests:** PKGBUILD bash -n; verification step re-downloads the tarball and recomputes the checksum (same check makepkg performs).
+- **Errors:** Old PAT was rotated (push failed with 'could not read Username') — resolved by user-provided replacement token; xvfb reinstalled after sandbox reprovisioning.
+- **Resolution:** new remote credentials; stack reinstalled.
+- **Result:** pushed.
+- **Git commit:** `task: pin real sha256 of the v0.1.3 release tarball`
+- **Next task:** final verification + status report.

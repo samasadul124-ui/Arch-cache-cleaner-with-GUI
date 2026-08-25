@@ -271,3 +271,19 @@ Verification: reproduced pre-fix (50k freed of 350k, 300k silently remained);
          full suite + GUI smoke
 Commit:  E-014 commit series
 ```
+
+## E-015 — Near-miss: pinned sha256 of GitHub's not-yet-generated archive error page
+```
+Timestamp: 2026-08-26
+Task:    v0.1.4 release sha pinning
+File:    packaging/PKGBUILD
+Command: curl tag tarball immediately after git push of the tag
+Error:   Downloaded body was an error page (archive generation lag ~10-30 s);
+         its sha256 was written into the PKGBUILD; a naive flow would have
+         committed a checksum that could never validate
+Root cause: GitHub generates tag archives lazily; first GET returns 404/JSON
+Resolution: magic-byte (1f8b) verification loop before hashing; re-downloaded
+         the real archive; set -e + pipeline failure stopped the bad commit
+Verification: final pinned sha equals a fresh download's sha256
+Commit:  task: pin real sha256 of the v0.1.4 release tarball
+```

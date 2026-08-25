@@ -65,11 +65,13 @@ class ProviderRow(Gtk.ListBoxRow):
         if interactive:
             btn = Gtk.Button(label="Clean")
             btn.set_tooltip_text(p.explain())
-            btn.set_sensitive(not scan.needs_elevation and scan.size_bytes > 0)
+            btn.set_sensitive(scan.size_bytes > 0)
             if scan.needs_elevation:
+                # E-011: clicking triggers the system polkit authentication
+                # dialog — the app itself never runs as root
                 btn.set_tooltip_text(
-                    "Needs administrator privileges — use the pacman helper "
-                    "or run: sudo paccache -r")
+                    "Administrator authentication will be requested "
+                    "(system dialog — your password is never seen by this app)")
             btn.connect("clicked", lambda _b: on_clean(p.id))
             box.append(btn)
 

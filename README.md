@@ -8,7 +8,7 @@ to report the real result.
 Built with **GTK 4 + libadwaita** — a native Linux app, no web runtime, no
 bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 
-![status](https://img.shields.io/badge/version-0.1.3-blue)
+![status](https://img.shields.io/badge/version-0.1.4-blue)
 
 ## Features
 
@@ -71,7 +71,7 @@ Or manually:
 ```bash
 git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
 cd Arch-cache-cleaner-with-GUI/packaging
-makepkg -si          # builds cachecleaner-0.1.3-any.pkg.tar.zst and installs
+makepkg -si          # builds cachecleaner-0.1.4-any.pkg.tar.zst and installs
 ```
 
 Then launch **"Cache Cleaner"** from your application menu, or run
@@ -155,7 +155,7 @@ deletes anything from a real home directory.
 
 ## Project status
 
-Version **0.1.3** — bugfix release over 0.1.0 (PKGBUILD source-directory
+Version **0.1.4** — bugfix release over 0.1.0 (PKGBUILD source-directory
 coupling fixed with regression tests; pacman cache cleaning now performs real
 polkit authentication with measured before/after verification). Feature-
 complete for the initial goal set and tested, but not yet battle-hardened on

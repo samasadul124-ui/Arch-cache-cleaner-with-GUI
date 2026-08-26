@@ -266,6 +266,15 @@ class MainWindow(Adw.ApplicationWindow):
                if s.provider.id in approved):
             body += ("\n\nThe system authentication dialog will appear for the "
                      "root-owned pacman package cache.")
+        # E-016: never let excluded approval-requiring data look like a silent
+        # no-op — name it in the confirmation dialog
+        excluded = [s for s in self.report.scans
+                    if s.conditional_bytes > 0 and s.provider.id not in approved]
+        if excluded:
+            names = ", ".join(f"{s.provider.name} ({format_bytes(s.conditional_bytes)})"
+                              for s in excluded)
+            body += (f"\n\nNot included without approval: {names}. "
+                     "Tick their 'Include' box to add them.")
         dlg = Adw.AlertDialog.new("Clean all cache?", body)
         dlg.add_response("cancel", "Cancel")
         dlg.add_response("clean", "Clean")

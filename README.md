@@ -153,13 +153,38 @@ python3 tools/bench_cli.py                        # engine benchmarks
 Tests run exclusively in isolated temporary fixtures — the test suite never
 deletes anything from a real home directory.
 
-## Project status
+## Project status — CLOSED at v0.1.5
 
-Version **0.1.5** — bugfix release over 0.1.0 (PKGBUILD source-directory
-coupling fixed with regression tests; pacman cache cleaning now performs real
-polkit authentication with measured before/after verification). Feature-
-complete for the initial goal set and tested, but not yet battle-hardened on
-many real user machines. Report issues on the GitHub issue tracker.
+Development closed on **2026-08-26** at version **0.1.5**. The repository
+remains public as-is; no further development is planned.
+
+**Delivered:**
+
+* Native GTK4/libadwaita GUI + headless CLI sharing one engine
+  (`scan → classify → validate → guarded delete → fresh rescan → measured report`)
+* 28 static cache providers (browsers, package managers, language toolchains,
+  Electron apps, desktop caches) + dynamic `~/.cache` discovery
+* Three-tier safety model (`SAFE / CONDITIONAL / DO_NOT_DELETE`) with a
+  symlink-aware path validator; streaming, O(1)-RAM filesystem measurement
+* Root-owned pacman cache cleaned via polkit + an isolated ~40-line helper —
+  the GUI never runs as root and never sees a password
+* Arch package with **pinned release checksums**, `.desktop` launcher, SVG icon
+* Per-provider transparency: rows show *"X cleanable now · Y needs approval"*,
+  an Include checkbox, three-choice clean dialogs, and a Clean All dialog that
+  names everything it excludes (E-014/E-016)
+* 159 automated tests, headless GUI smoke test, measured performance
+  (`PERFORMANCE.md`), full task journal (`TASK_LOG.md`) and 16 recorded
+  errors with resolutions (`ERRORS.md`)
+
+**Known limitation (stated honestly):** robustness is proven by unit,
+integration and headless GUI tests, plus one real EndeavourOS machine.
+Exotic real-world conditions (NFS-mounted homes, unusual mounts,
+million-file trees, concurrent writers) were designed for but not
+battle-tested at scale.
+
+Console output carries the same structured `key=value` fields as the log file
+(`~/.local/state/cachecleaner/cachecleaner.log`), so terminal output is
+self-diagnosing.
 
 ## License
 

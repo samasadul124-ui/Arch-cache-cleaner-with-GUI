@@ -603,3 +603,14 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** v0.1.5 tagged/pushed; sha pinned 75b189ae…3ef25b and verified.
 - **Git commit:** E-016 series
 - **Next task:** user-side ground truth via CLI.
+
+## Tasks 70-71 — Final documentation pass & project closure
+- **Task:** Close the project with accurate final documentation.
+- **Files:** `README.md`, `ARCHITECTURE.md`, `TASK_LOG.md`
+- **Changes:** README "Project status — CLOSED at v0.1.5" with delivered-feature
+  list and honest limitation note; ARCHITECTURE §16 transparency model; this
+  closure entry.
+- **Final statistics:** 134 commits · tags v0.1.0–v0.1.5 · 159 tests ·
+  errors E-001–E-016 all recorded with resolutions · payload ~101 KiB.
+- **Result:** pushed; repository remains public; no further work planned.
+- **Git commit:** `task: final documentation pass and project closure`

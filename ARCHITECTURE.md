@@ -198,3 +198,21 @@ cache-cleaner/
 Semantic versioning, starting at **0.1.0**. Not production-ready until: destructive ops tested,
 safety rules tested, package creation succeeds, launcher works, UI works, post-clean
 verification works, error logging works.
+
+## 16. UI transparency model (added in 0.1.4/0.1.5 — E-014, E-016)
+
+A provider's displayed total must never silently exceed what the current
+action will free:
+
+* `calculate_size()` records `(safe, conditional, protected)` byte shares;
+* `ProviderScan` exposes `eligible_bytes` / `conditional_bytes`;
+* rows with a conditional share show *"X cleanable now · Y needs approval"*
+  plus an **Include** checkbox;
+* per-provider Clean opens *Cancel / Clean regenerable / Clean all*;
+* the Clean All confirmation names every excluded conditional provider with
+  its byte count;
+* the console logger emits the same `key=value` fields as the file log, so
+  pasted terminal output self-documents (`freed=`, `errors=`, …).
+
+This closes the perception bug where spec-correct conditional skipping looked
+like "cleaning does nothing".

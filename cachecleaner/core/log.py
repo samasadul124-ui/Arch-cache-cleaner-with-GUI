@@ -64,7 +64,9 @@ def setup_logging(verbose: bool = False, logfile: Optional[str] = None) -> str:
 
     ch = logging.StreamHandler(sys.stderr)
     ch.setLevel(logging.DEBUG if verbose else logging.INFO)
-    ch.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+    # console gets the same structured fields as the file log, so pasted
+    # terminal output carries the diagnostic numbers (freed=, errors=, …)
+    ch.setFormatter(_KVFormatter("%(levelname)s %(name)s: %(message)s"))
     root.addHandler(ch)
     _CONFIGURED = True
     return path

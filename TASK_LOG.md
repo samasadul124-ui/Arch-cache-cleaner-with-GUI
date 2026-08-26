@@ -594,3 +594,12 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** committed.
 - **Git commit:** E-014 series
 - **Next task:** version 0.1.4 + release with pinned sha.
+
+## Task 69 — 0.1.5: Clean All transparency + structured console logs (E-016)
+- **Task:** Kill the 'it still doesnt clean' perception: name exclusions, show numbers.
+- **Files:** `cachecleaner/gui/window.py`, `cachecleaner/core/log.py`
+- **Changes:** Clean All confirmation lists excluded conditional providers with byte counts and the Include hint; console formatter emits key=value fields (freed=, errors=) so terminal output is self-diagnosing.
+- **Tests:** full suite green; GUI smoke PASS.
+- **Result:** v0.1.5 tagged/pushed; sha pinned 75b189ae…3ef25b and verified.
+- **Git commit:** E-016 series
+- **Next task:** user-side ground truth via CLI.

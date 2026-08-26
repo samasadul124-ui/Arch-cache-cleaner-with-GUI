@@ -293,3 +293,23 @@ Verification: pinned sha a34a3f47… matches the magic-byte-verified real
          real archive whose sha equals the pinned one.
 Commit:  task: pin real sha256 of the v0.1.4 release tarball
 ```
+
+## E-016 — Clean All silently excludes approval-requiring data; looked like 'does nothing' (USER-REPORTED)
+```
+Timestamp: 2026-08-26 (user machine, v0.1.4; Clean All freed ~0 of the 311 MiB
+         Cargo total because the bulk is conditional registry/src)
+Task:    Task 69 — transparency fixes
+File:    cachecleaner/gui/window.py, cachecleaner/core/log.py
+Error:   user perception: 'it still doesnt clean' — Clean All behaved per spec
+         (conditional data needs approval) but the confirmation dialog did not
+         say which providers/bytes were being left out; console log also hid
+         the freed= numbers (only the file log had them)
+Root cause: UX transparency gap on top of the E-014 classification model
+Resolution: Clean All dialog now lists every excluded provider with its
+         conditional byte count ('Not included without approval: Cargo
+         (300 MiB). Tick Include…'); console formatter now emits the same
+         key=value fields as the file log
+Verification: GUI smoke + full suite; user-side CLI ground-truth command
+         provided (clean --json --providers lang.cargo --include-conditional)
+Commit:  E-016 series (0.1.5)
+```

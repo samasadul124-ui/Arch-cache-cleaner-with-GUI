@@ -313,3 +313,22 @@ Verification: GUI smoke + full suite; user-side CLI ground-truth command
          provided (clean --json --providers lang.cargo --include-conditional)
 Commit:  E-016 series (0.1.5)
 ```
+
+## E-017 — /var/cache/debtap (~1 GiB) not identified or cleaned (USER-REPORTED)
+```
+Timestamp: 2026-08-26 (user's Filelight screenshot: /var/cache/debtap 1.2 GiB)
+Task:    Tasks 72-78 — debtap provider (maintenance release 0.1.6)
+File:    packaging/cachecleaner-paccache, cachecleaner/core/elevation.py,
+         cachecleaner/providers/pkgman.py, providers/__init__.py
+Error:   no provider modeled debtap; app correctly refused to sweep unknown
+         /var/cache entries (safety rule), so the 1.2 GiB stayed untouched
+Root cause: coverage gap, not a defect — system caches are DO_NOT_DELETE until
+         explicitly modeled, classified and allowlisted in the helper
+Resolution: DebtapProvider (CONDITIONAL_CACHE) on a new SystemCacheProvider
+         base; helper now takes a NAMED target from a hard internal allowlist
+         (pacman|debtap) — arbitrary paths still impossible; polkit flow reused;
+         verified live in sandbox (1.1 MiB freed, REMAINING 0, bad target rc=2)
+Verification: helper live tests; debtap provider matrix; elevation argv
+         contract [pkexec, helper, TARGET, KEEP]; full suite; GUI smoke
+Commit:  E-017 series (0.1.6)
+```

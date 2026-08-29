@@ -46,14 +46,24 @@ def build_parser() -> argparse.ArgumentParser:
                    help="explicitly approved CONDITIONAL_CACHE provider ids")
     p.add_argument("--yes", "-y", action="store_true",
                    help="skip the confirmation prompt for --clean")
+    p.add_argument("--advanced", action="store_true",
+                   help="opt-in layer-5 scan: list folders named '*cache*'")
+    p.add_argument("--sweep", metavar="PATH", action="append", default=[],
+                   help="explicitly select an advanced sweep path for --clean "
+                        "(repeatable; implies --advanced)")
     return p
 
 
 # ------------------------------------------------------------------ output
 def print_scan(rep: ScanReport, as_json: bool) -> None:
+    sweep_paths = []
+    sw = rep.by_id("advanced.cache-name-sweep")
+    if sw is not None:
+        sweep_paths = [cp.path for cp in sw.provider.cache_paths()]
     if as_json:
         print(json.dumps({
             "total_bytes": rep.total_bytes,
+            "advanced_sweep_paths": sweep_paths,
             "providers": [
                 {"id": s.provider.id, "name": s.provider.name,
                  "category": s.provider.category.value,
@@ -69,6 +79,11 @@ def print_scan(rep: ScanReport, as_json: bool) -> None:
         flag = " [needs root]" if s.needs_elevation else ""
         print(f"  {format_bytes(s.size_bytes):>10}  {s.provider.name}{flag}")
         print(f"             id={s.provider.id}  ({s.provider.category.value})")
+        if s.provider.id == "advanced.cache-name-sweep":
+            for pth in sweep_paths[:100]:
+                print(f"               - {pth}")
+            if len(sweep_paths) > 100:
+                print(f"               …and {len(sweep_paths) - 100} more")
 
 
 def print_clean(out: CleanReport, as_json: bool) -> None:
@@ -125,12 +140,19 @@ def run(argv: list[str] | None = None) -> int:
     ids = set(filter(None, (args.providers or "").split(","))) or None
     conditional = set(filter(None, (args.include_conditional or "").split(",")))
 
+    advanced = args.advanced or bool(args.sweep)
     try:
-        report = engine.scan()
+        report = engine.scan(advanced=advanced)
     except Exception as exc:
         log.log_event(_logger, "scan_fatal", error=str(exc), level=40)
         print(f"FATAL: scan failed: {exc}", file=sys.stderr)
         return 2
+
+    sweep_scan = report.by_id("advanced.cache-name-sweep")
+    if args.sweep and sweep_scan is not None:
+        sweep_scan.provider.selected = set(args.sweep)   # manual selection
+        ids = {sweep_scan.provider.id}
+        conditional = {sweep_scan.provider.id}
 
     if args.scan:
         print_scan(report, args.json)

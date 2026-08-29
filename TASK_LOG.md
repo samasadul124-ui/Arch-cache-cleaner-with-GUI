@@ -645,3 +645,16 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** v0.2.0.
 - **Git commit:** sweep series
 - **Next task:** release pin + closure.
+
+## Task 85 — Select all / Select none buttons (user request)
+- **Task:** user asked for a working "select all" next to the sweep checkboxes.
+- **File:** `cachecleaner/gui/window.py`, `tests/gui_smoke.py`
+- **Changes:** `Select all` / `Select none` buttons beside `Clean selected`;
+  `_set_all_sweep()` toggles every checkbox; smoke test now flips the advanced
+  switch and clicks both buttons for real.
+- **Errors:** first smoke run hung — GTK4 `Button` has no `.clicked()` method
+  (GTK3 API); checker thread died on AttributeError and the app never quit.
+  Fixed with `emit('clicked')` from the main loop.
+- **Tests:** smoke PASS with select_all=True select_none=True; full suite green.
+- **Result:** v0.2.1.
+- **Git commit:** select-all series

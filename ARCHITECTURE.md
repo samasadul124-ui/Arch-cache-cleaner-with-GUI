@@ -216,3 +216,14 @@ action will free:
 
 This closes the perception bug where spec-correct conditional skipping looked
 like "cleaning does nothing".
+
+
+## 17. Layer-5 advanced sweep (0.2.0)
+
+`core/sweep.py` + `providers/sweep.py` implement the original spec's optional
+advanced scan: opt-in only (`engine.scan(advanced=True)`, GUI switch, CLI
+`--advanced`), bounded traversal of $HOME for `*cache*`-named directories,
+symlink-safe, denylist-child-safe, and surfaced exclusively as
+CONDITIONAL_CACHE with per-entry manual selection
+(`manual_selection_only` keeps it out of Clean All and the global safety
+allowlist). The other 29 providers are untouched by this feature.

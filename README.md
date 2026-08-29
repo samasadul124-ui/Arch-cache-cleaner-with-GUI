@@ -8,7 +8,7 @@ to report the real result.
 Built with **GTK 4 + libadwaita** — a native Linux app, no web runtime, no
 bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 
-![status](https://img.shields.io/badge/version-0.1.6-blue)
+![status](https://img.shields.io/badge/version-0.2.0-blue)
 
 ## Features
 
@@ -27,6 +27,14 @@ bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 * **Clean All with live progress**, per-provider cleaning, cancellation,
   dry-run, and a full report: before / removed / remaining (fresh scan) /
   cleaned / skipped / errors.
+* **Advanced manual sweep (opt-in)** — flip the *Advanced* switch (or pass
+  `--advanced`) and the app lists **every folder in your home whose name
+  contains 'cache'** (case-insensitive). Nothing is deleted unless you tick
+  an entry yourself and press *Clean selected* (or pass `--sweep PATH` on the
+  CLI). Discovery is bounded (home only, depth-capped, `.git`/`node_modules`
+  pruned, symlinks never followed) and every candidate still passes the path
+  validator; directories containing protected names (`tdata`, keyrings, …)
+  are never offered. Existing providers and Clean All behaviour are unchanged.
 * **Runs as a normal user.** Cleaning the root-owned pacman package cache
   triggers the **system polkit authentication dialog** from inside the app —
   the isolated ~40-line audited helper does the privileged work, the GUI
@@ -71,7 +79,7 @@ Or manually:
 ```bash
 git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
 cd Arch-cache-cleaner-with-GUI/packaging
-makepkg -si          # builds cachecleaner-0.1.6-any.pkg.tar.zst and installs
+makepkg -si          # builds cachecleaner-0.2.0-any.pkg.tar.zst and installs
 ```
 
 Then launch **"Cache Cleaner"** from your application menu, or run
@@ -121,7 +129,16 @@ python -m cachecleaner --clean --yes
 
 Useful flags: `--json` (machine-readable), `--providers id1,id2`,
 `--include-conditional id` (explicit approval), `--home DIR` (test against
-another home), `--verbose`.
+another home), `--verbose`, `--advanced` (list '*cache*' folders),
+`--sweep PATH` (manually select an advanced-sweep path for `--clean`,
+repeatable).
+
+Advanced sweep example:
+
+```bash
+cachecleaner --scan --advanced          # list every '*cache*' folder
+cachecleaner --clean --yes --sweep ~/.cache/someapp --sweep ~/proj/.cache
+```
 
 ## How safety works
 
@@ -157,7 +174,9 @@ deletes anything from a real home directory.
 
 Development closed on **2026-08-26** at version **0.1.5**, then
 reopened once for maintenance release **0.1.6** (debtap database coverage,
-user-requested). Final state: **v0.1.6**.
+user-requested), and for feature release **0.2.0** (opt-in advanced
+'*cache*'-folder sweep with manual selection, user-requested).
+Final state: **v0.2.0**.
 
 **Delivered:**
 

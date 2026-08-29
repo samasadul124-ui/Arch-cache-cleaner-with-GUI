@@ -629,3 +629,19 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
 - **Result:** v0.1.6 tagged/pushed with pinned sha.
 - **Git commit:** E-017 series
 - **Next task:** closure, final.
+
+## Tasks 79-84 — Feature 0.2.0: opt-in '*cache*' manual sweep
+- **Task:** user request: handle every sub-directory whose name includes
+  'cache', deleted only on manual selection; all existing modules unchanged.
+- **Files:** core/sweep.py, providers/sweep.py, providers/__init__.py,
+  core/engine.py, cli.py, gui/window.py, tests/test_sweep.py.
+- **Safety:** off by default; bounded home-only walk (depth 6, prunes
+  .git/node_modules); symlinks never followed/listed; candidates with
+  denylisted children never offered; selection re-validated (name + validator)
+  immediately before deletion; excluded from Clean All and global allowlist.
+- **Tests:** 11 sweep tests (discovery rules, engine wiring, selection-only
+  clean, outside-path and non-cache-name refusal); full suite green; GUI smoke
+  PASS.
+- **Result:** v0.2.0.
+- **Git commit:** sweep series
+- **Next task:** release pin + closure.

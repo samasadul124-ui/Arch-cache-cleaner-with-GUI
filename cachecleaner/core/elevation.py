@@ -90,11 +90,23 @@ def _parse_helper_output(text: str) -> tuple[Optional[int], Optional[int]]:
 def run_paccache(keep: int = 0,
                  pkexec: str = "pkexec",
                  helper: Optional[str] = None) -> ElevationResult:
-    """Run the pacman-cache helper under polkit authentication.
+    """Run the pacman-cache helper under polkit authentication (legacy API)."""
+    return run_syscache("pacman", keep=keep, pkexec=pkexec, helper=helper)
+
+
+def run_syscache(target: str,
+                 keep: int = 0,
+                 pkexec: str = "pkexec",
+                 helper: Optional[str] = None) -> ElevationResult:
+    """Run the system-cache helper for an allowlisted target under polkit.
 
     ``pkexec``/``helper`` are injectable for testing. The password prompt is
-    drawn and handled entirely by the system polkit agent.
+    drawn and handled entirely by the system polkit agent; the helper itself
+    only accepts named targets (pacman|debtap), never arbitrary paths.
     """
+    if target not in ("pacman", "debtap"):
+        return ElevationResult(ElevationStatus.HELPER_ERROR,
+                               detail=f"unknown target: {target}")
     helper = helper or find_helper()
     if not helper:
         log.log_event(_logger, "helper_missing", level=40)
@@ -105,8 +117,9 @@ def run_paccache(keep: int = 0,
             ElevationStatus.LAUNCH_ERROR,
             detail="pkexec not found — install the 'polkit' package")
 
-    cmd = [pkexec, helper, str(int(keep))]
-    log.log_event(_logger, "elevation_request", helper=helper, keep=keep)
+    cmd = [pkexec, helper, target, str(int(keep))]
+    log.log_event(_logger, "elevation_request", helper=helper, target=target,
+                  keep=keep)
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True,
                               timeout=PKEXEC_TIMEOUT_S)

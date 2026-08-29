@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cachecleaner"
-version = "0.1.6"
+version = "0.2.0"
 description = "Modern, safe cache-cleaning utility for EndeavourOS / Arch Linux (GTK4/libadwaita)"
 readme = "README.md"
 requires-python = ">=3.10"

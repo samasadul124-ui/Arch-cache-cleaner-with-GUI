@@ -307,11 +307,27 @@ class MainWindow(Adw.ApplicationWindow):
                                    "(use the CLI --advanced to list all)")
             more.add_css_class("caption")
             box.append(more)
+        ctl = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        sel_all = Gtk.Button(label="Select all")
+        sel_all.set_tooltip_text("Tick every listed folder")
+        sel_all.connect("clicked", lambda _b: self._set_all_sweep(True))
+        sel_none = Gtk.Button(label="Select none")
+        sel_none.set_tooltip_text("Untick every listed folder")
+        sel_none.connect("clicked", lambda _b: self._set_all_sweep(False))
+        ctl.append(sel_all)
+        ctl.append(sel_none)
+        self.adv_select_all_btn = sel_all
+        self.adv_select_none_btn = sel_none
         btn = Gtk.Button(label="Clean selected")
         btn.add_css_class("destructive-action")
         btn.connect("clicked", lambda _b: self._clean_selected_sweep(sweep))
         self.adv_holder.append(box)
+        self.adv_holder.append(ctl)
         self.adv_holder.append(btn)
+
+    def _set_all_sweep(self, state: bool) -> None:
+        for cb, _pth in getattr(self, "_sweep_checks", []):
+            cb.set_active(bool(state))
 
     def _clean_selected_sweep(self, sweep) -> None:
         selected = {pth for cb, pth in getattr(self, "_sweep_checks", [])

@@ -7,8 +7,8 @@
   <vendor_url>https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI</vendor_url>
 
   <action id="io.github.cachecleaner.paccache">
-    <description>Clean the pacman package cache</description>
-    <message>Cache Cleaner needs administrator privileges to remove files from /var/cache/pacman/pkg</message>
+    <description>Clean root-owned system package caches (pacman / debtap)</description>
+    <message>Cache Cleaner needs administrator privileges to clean root-owned system package caches (/var/cache/pacman/pkg, /var/cache/debtap)</message>
     <icon_name>cachecleaner</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>

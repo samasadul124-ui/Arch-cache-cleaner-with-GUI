@@ -8,7 +8,7 @@ to report the real result.
 Built with **GTK 4 + libadwaita** — a native Linux app, no web runtime, no
 bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 
-![status](https://img.shields.io/badge/version-0.2.0-blue)
+![status](https://img.shields.io/badge/version-0.2.1-blue)
 
 ## Features
 
@@ -79,7 +79,7 @@ Or manually:
 ```bash
 git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
 cd Arch-cache-cleaner-with-GUI/packaging
-makepkg -si          # builds cachecleaner-0.2.0-any.pkg.tar.zst and installs
+makepkg -si          # builds cachecleaner-0.2.1-any.pkg.tar.zst and installs
 ```
 
 Then launch **"Cache Cleaner"** from your application menu, or run
@@ -176,7 +176,7 @@ Development closed on **2026-08-26** at version **0.1.5**, then
 reopened once for maintenance release **0.1.6** (debtap database coverage,
 user-requested), and for feature release **0.2.0** (opt-in advanced
 '*cache*'-folder sweep with manual selection, user-requested).
-Final state: **v0.2.0**.
+Final state: **v0.2.1**.
 
 **Delivered:**
 

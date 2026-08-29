@@ -1,51 +1,66 @@
 #!/usr/bin/env bash
-# cachecleaner-paccache — minimal privileged helper (rule 7, E-011 wiring).
+# cachecleaner-paccache — minimal privileged helper (rule 7; E-011, E-017).
 #
-# The Cache Cleaner GUI runs as the normal user. Cleaning /var/cache/pacman/pkg
-# genuinely needs root, so it is delegated to THIS small script, invoked via:
+# The Cache Cleaner GUI runs as the normal user. Cleaning root-owned system
+# caches genuinely needs root, so it is delegated to THIS small script:
 #
-#     pkexec /usr/bin/cachecleaner-paccache [KEEP]
+#     pkexec /usr/bin/cachecleaner-paccache [TARGET] [KEEP]
 #
-# KEEP (default 0): number of newest package versions to retain per package
-# name (rollback safety). KEEP=0 removes everything.
+#   TARGET: pacman | debtap   (default: pacman) — a hard internal allowlist;
+#           no arbitrary path is ever accepted from the caller.
+#   KEEP:   newest package versions to retain (pacman only; default 0).
+#   Legacy: a single numeric argument means TARGET=pacman KEEP=<n>.
+#
+# Targets (the ONLY directories this script can ever touch):
+#   pacman → /var/cache/pacman/pkg     downloaded package files
+#   debtap → /var/cache/debtap         debtap's downloaded .deb metadata DBs
 #
 # Output contract (parsed by cachecleaner.core.elevation):
 #   FREED_BYTES=<int>        bytes actually removed (measured before/after)
 #   REMAINING_BYTES=<int>    bytes still present afterwards (measured)
-#   human-readable summary line
 #
 # Exit codes: 0 success · 1 internal error · 2 bad arguments.
-# Deliberately tiny and auditable: no network, one integer argument, operates
-# on exactly one hard-coded directory. Never stores or sees any password —
-# polkit/pkexec performs authentication before this script starts.
+# Never stores or sees any password — polkit/pkexec authenticates first.
 set -euo pipefail
 
-TARGET="/var/cache/pacman/pkg"
-KEEP="${1:-0}"
+case "${1:-pacman}" in
+  pacman)  TARGET=pacman; KEEP="${2:-0}" ;;
+  debtap)  TARGET=debtap; KEEP=0 ;;
+  *)
+    # legacy invocation: "cachecleaner-paccache 2"
+    if [[ "$1" =~ ^[0-9]+$ ]]; then TARGET=pacman; KEEP="$1"; else
+      echo "ERROR=bad-args: TARGET must be 'pacman' or 'debtap'" >&2; exit 2
+    fi ;;
+esac
+if [[ ! "$KEEP" =~ ^[0-9]+$ ]]; then
+  echo "ERROR=bad-args: KEEP must be an integer (got: $KEEP)" >&2
+  exit 2
+fi
+
+case "$TARGET" in
+  pacman)  TARGET_DIR="/var/cache/pacman/pkg" ;;
+  debtap)  TARGET_DIR="/var/cache/debtap" ;;
+esac
 
 if [[ $EUID -ne 0 ]]; then
   echo "ERROR=not-root: must run as root (use: pkexec cachecleaner-paccache)" >&2
   exit 1
 fi
-if [[ ! "$KEEP" =~ ^[0-9]+$ ]]; then
-  echo "ERROR=bad-args: KEEP must be an integer (got: $KEEP)" >&2
-  exit 2
-fi
-if [[ ! -d "$TARGET" ]]; then
+if [[ ! -d "$TARGET_DIR" ]]; then
   echo "FREED_BYTES=0"
   echo "REMAINING_BYTES=0"
-  echo "pacman cache: nothing to do ($TARGET does not exist)"
+  echo "$TARGET: nothing to do ($TARGET_DIR does not exist)"
   exit 0
 fi
 
-before=$(du -sb "$TARGET" | cut -f1)
+before=$(du -sb "$TARGET_DIR" | cut -f1)
 
-if [[ "$KEEP" -eq 0 ]]; then
-  find "$TARGET" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -delete
+if [[ "$TARGET" == "debtap" || "$KEEP" -eq 0 ]]; then
+  # full clean: remove every entry inside the allowlisted directory
+  find "$TARGET_DIR" -mindepth 1 -delete
 else
-  # Keep the $KEEP newest files per package name (name = filename with the
-  # "-<version>-<rel>-<arch>.pkg.tar.*" suffix stripped).
-  find "$TARGET" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -printf '%T@\t%p\n' \
+  # pacman with rollback retention: keep the $KEEP newest files per package
+  find "$TARGET_DIR" -mindepth 1 -maxdepth 1 \( -type f -o -type l \) -printf '%T@\t%p\n' \
   | sort -rn \
   | awk -F'\t' -v keep="$KEEP" '
       { file=$2; n=split(file, a, "/"); base=a[n];
@@ -54,7 +69,7 @@ else
   | while read -r f; do rm -f -- "$f"; done
 fi
 
-after=$(du -sb "$TARGET" | cut -f1)
+after=$(du -sb "$TARGET_DIR" | cut -f1)
 echo "FREED_BYTES=$(( before - after ))"
 echo "REMAINING_BYTES=$after"
-echo "pacman cache: freed $(( (before - after) / 1024 )) KiB (kept $KEEP newest per package)"
+echo "$TARGET: freed $(( (before - after) / 1024 )) KiB (kept $KEEP newest per package)"

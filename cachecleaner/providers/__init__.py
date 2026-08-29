@@ -21,10 +21,12 @@ from .langtools import (CargoProvider, CcacheProvider, GoBuildCacheProvider,
                         YarnProvider)
 from .pkgman import (DebtapProvider, FlatpakProvider,
                      PacmanCacheProvider, ParuProvider, YayProvider)
+from .sweep import CacheNameSweepProvider
 from .xdg import (FontconfigProvider, KdeSycocaProvider,
                   MesaShaderCacheProvider, ThumbnailsProvider)
 
-__all__ = ["PROVIDER_CLASSES", "instantiate_all", "detect_all"]
+__all__ = ["PROVIDER_CLASSES", "instantiate_all", "detect_all",
+         "CacheNameSweepProvider"]
 
 PROVIDER_CLASSES: Sequence[type[CacheProvider]] = (
     # desktop / XDG

@@ -25,7 +25,7 @@ _srcrepo=Arch-cache-cleaner-with-GUI
 source=("$_srcrepo-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 # real sha256 of the v$pkgver release tarball (verified at release time).
 # Workflow for each release: tag → download tarball → sha256sum → pin here.
-sha256sums=('1ba0011127330f85209e5c689cce618ee65f6557361cf4f04e9566ac3a9b2ae9')
+sha256sums=('1762b224e57abf1e252e153f910e4c4e7ce71834532334a157a2901fe9f41e27')
 
 build() {
   cd "$srcdir/$_srcrepo-$pkgver"

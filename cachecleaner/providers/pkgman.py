@@ -20,47 +20,37 @@ from ..core.provider import (CachePath, CacheProvider, Category,
                              ProviderCleanResult)
 from ..core.safety import SafetyLevel
 
-__all__ = ["PacmanCacheProvider", "YayProvider", "ParuProvider", "FlatpakProvider"]
+__all__ = ["SystemCacheProvider", "PacmanCacheProvider", "DebtapProvider", "YayProvider", "ParuProvider", "FlatpakProvider"]
 
 PACMAN_PKG_CACHE = "/var/cache/pacman/pkg"
 
 
-class PacmanCacheProvider(CacheProvider):
-    id = "pkgman.pacman"
-    name = "pacman package cache"
-    category = Category.PACKAGE_MANAGER
-    safety = SafetyLevel.CONDITIONAL_CACHE
-    #: versions kept per package when cleaning via the helper (0 = full clean,
-    #: matching the size shown in the UI)
+class SystemCacheProvider(CacheProvider):
+    """Shared logic for root-owned, helper-cleaned system caches (E-011/017).
+
+    Subclasses declare a named target that the privileged helper hard-
+    allowlists — arbitrary paths are impossible by construction.
+    """
+
+    target_id: str = ""            # helper allowlist key: pacman | debtap
+    target_path: str = ""
+    purpose: str = ""
     keep_versions = 0
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
-        self._target = PACMAN_PKG_CACHE      # tests may redirect
+        self._target = self.target_path    # tests may redirect
 
     def detect(self) -> bool:
         return os.path.isdir(self._target)
 
     def cache_paths(self) -> list[CachePath]:
-        return [CachePath(
-            self._target,
-            "Downloaded package files kept by pacman (rollback source)",
-            SafetyLevel.CONDITIONAL_CACHE,
-        )]
+        return [CachePath(self._target, self.purpose,
+                          SafetyLevel.CONDITIONAL_CACHE)]
 
     def needs_elevation(self) -> bool:
         return not os.access(self._target, os.W_OK)
 
-    def explain(self) -> str:
-        return ("Deletes the downloaded .pkg.tar.zst files pacman keeps in "
-                "/var/cache/pacman/pkg. The system authentication dialog will "
-                "appear because this folder belongs to the administrator. "
-                "Packages are re-downloaded from the mirrors if needed, but "
-                "downgrading without network becomes impossible. To keep the "
-                "2 newest versions per package instead, run: "
-                "pkexec cachecleaner-paccache 2")
-
-    # ------------------------------------------------------- cleaning (E-011)
     def clean(
         self,
         dry_run: bool = False,
@@ -89,7 +79,7 @@ class PacmanCacheProvider(CacheProvider):
             res.cancelled = True
             return res
 
-        er = elevation.run_paccache(keep=self.keep_versions)
+        er = elevation.run_syscache(self.target_id, keep=self.keep_versions)
 
         if er.status is elevation.ElevationStatus.SUCCESS:
             # ---- verification (report §8): fresh measurement, no assumptions
@@ -106,16 +96,61 @@ class PacmanCacheProvider(CacheProvider):
                     f"remaining: {after} B")
         elif er.status is elevation.ElevationStatus.CANCELLED:
             res.errors.add(ErrorKind.CANCELLED, self._target, self.id,
-                           "Pacman cache cleanup cancelled.")
+                           f"{self.name} cleanup cancelled.")
         elif er.status is elevation.ElevationStatus.AUTH_FAILED:
             res.errors.add(ErrorKind.INSUFFICIENT_PRIVILEGES, self._target,
-                           self.id, "Authentication failed. Pacman cache was "
+                           self.id, f"Authentication failed. {self.name} was "
                                     "not modified.")
         else:  # helper_error / helper_missing / launch_error
             res.errors.add(ErrorKind.INSUFFICIENT_PRIVILEGES, self._target,
                            self.id, er.user_message()
                            + (f" ({er.detail})" if er.detail else ""))
         return res
+
+
+class PacmanCacheProvider(SystemCacheProvider):
+    id = "pkgman.pacman"
+    name = "pacman package cache"
+    category = Category.PACKAGE_MANAGER
+    safety = SafetyLevel.CONDITIONAL_CACHE
+    target_id = "pacman"
+    target_path = PACMAN_PKG_CACHE
+    purpose = "Downloaded package files kept by pacman (rollback source)"
+    #: versions kept per package when cleaning via the helper (0 = full clean,
+    #: matching the size shown in the UI)
+    keep_versions = 0
+
+    def explain(self) -> str:
+        return ("Deletes the downloaded .pkg.tar.zst files pacman keeps in "
+                "/var/cache/pacman/pkg. The system authentication dialog will "
+                "appear because this folder belongs to the administrator. "
+                "Packages are re-downloaded from the mirrors if needed, but "
+                "downgrading without network becomes impossible. To keep the "
+                "2 newest versions per package instead, run: "
+                "pkexec cachecleaner-paccache 2")
+
+
+DEBTAP_CACHE = "/var/cache/debtap"
+
+
+class DebtapProvider(SystemCacheProvider):
+    id = "pkgman.debtap"
+    name = "debtap databases"
+    category = Category.PACKAGE_MANAGER
+    safety = SafetyLevel.CONDITIONAL_CACHE
+    target_id = "debtap"
+    target_path = DEBTAP_CACHE
+    purpose = "debtap's downloaded Debian/Ubuntu package metadata"
+
+    def detect(self) -> bool:
+        return os.path.isdir(self._target) or self.ctx.which("debtap")
+
+    def explain(self) -> str:
+        return ("Deletes debtap's downloaded package-list databases in "
+                "/var/cache/debtap (often ~1 GiB). They are only needed when "
+                "converting .deb packages and are recreated with "
+                "'sudo debtap -u'. Installed packages and system files are "
+                "not affected.")
 
 
 class _AurHelperProvider(CacheProvider):

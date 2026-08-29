@@ -117,7 +117,8 @@ class TestSecurityContract:
         finally:
             el.subprocess.run = orig
         cmd = seen["cmd"]
-        # minimal argv: [pkexec, helper, KEEP] — no secrets, no extra flags
-        assert len(cmd) == 3
-        assert cmd[2] == "0"
-        assert all(not c.startswith("-") for c in cmd[1:])
+        # minimal argv: [pkexec, helper, TARGET, KEEP] — no secrets, no paths
+        assert len(cmd) == 4
+        assert cmd[2] == "pacman" and cmd[3] == "0"
+        assert all(not c.startswith("-") and not c.startswith("/") or i < 2
+                   for i, c in enumerate(cmd))

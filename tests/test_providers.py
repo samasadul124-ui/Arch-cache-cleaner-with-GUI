@@ -180,13 +180,15 @@ class TestPacmanElevation:
         target = _pacman_fixture(home)
         p = _provider(ctx, target)
 
-        def fake_run(keep=0, **kw):            # helper deletes everything
-            for f in target.iterdir():
+        def fake_run(target, keep=0, **kw):    # helper deletes everything
+            assert target == "pacman"
+            for f in target_.iterdir():
                 f.unlink()
             return ElevationResult(ElevationStatus.SUCCESS, 10_000, 0)
 
+        target_ = target
         with mock.patch.object(p, "needs_elevation", return_value=True), \
-             mock.patch.object(elevation, "run_paccache", side_effect=fake_run):
+             mock.patch.object(elevation, "run_syscache", side_effect=fake_run):
             r = p.clean(include_conditional=True)
         assert r.bytes_freed == 10_000          # measured before/after
         assert len(r.errors) == 0
@@ -196,10 +198,10 @@ class TestPacmanElevation:
         target = _pacman_fixture(home)
         p = _provider(ctx, target)
         with mock.patch.object(p, "needs_elevation", return_value=True), \
-             mock.patch.object(elevation, "run_paccache",
+             mock.patch.object(elevation, "run_syscache",
                                return_value=ElevationResult(ElevationStatus.CANCELLED)):
             r = p.clean()
-        assert r.errors.records[0].detail == "Pacman cache cleanup cancelled."
+        assert r.errors.records[0].detail == "pacman package cache cleanup cancelled."
         assert sum(f.stat().st_size for f in target.iterdir()) == 10_000
 
     def test_auth_failed_message_and_no_change(self, fx):
@@ -207,11 +209,11 @@ class TestPacmanElevation:
         target = _pacman_fixture(home)
         p = _provider(ctx, target)
         with mock.patch.object(p, "needs_elevation", return_value=True), \
-             mock.patch.object(elevation, "run_paccache",
+             mock.patch.object(elevation, "run_syscache",
                                return_value=ElevationResult(ElevationStatus.AUTH_FAILED)):
             r = p.clean()
         assert r.errors.records[0].detail == (
-            "Authentication failed. Pacman cache was not modified.")
+            "Authentication failed. pacman package cache was not modified.")
         assert len(list(target.iterdir())) == 2
 
     def test_partial_cleanup_never_reports_success(self, fx):
@@ -219,12 +221,14 @@ class TestPacmanElevation:
         target = _pacman_fixture(home)
         p = _provider(ctx, target)
 
-        def partial(keep=0, **kw):             # helper could only remove one
-            (target / "a-1-1-x86_64.pkg.tar.zst").unlink()
+        tpath = target
+
+        def partial(target, keep=0, **kw):     # helper could only remove one
+            (tpath / "a-1-1-x86_64.pkg.tar.zst").unlink()
             return ElevationResult(ElevationStatus.SUCCESS, 4000, 6000)
 
         with mock.patch.object(p, "needs_elevation", return_value=True), \
-             mock.patch.object(elevation, "run_paccache", side_effect=partial):
+             mock.patch.object(elevation, "run_syscache", side_effect=partial):
             r = p.clean()
         assert r.bytes_freed == 4_000
         assert len(r.errors) == 1
@@ -245,7 +249,7 @@ class TestPacmanElevation:
         target = _pacman_fixture(home)
         p = _provider(ctx, target)
         with mock.patch.object(p, "needs_elevation", return_value=True), \
-             mock.patch.object(elevation, "run_paccache",
+             mock.patch.object(elevation, "run_syscache",
                                return_value=ElevationResult(
                                    ElevationStatus.HELPER_MISSING)):
             r = p.clean()
@@ -299,3 +303,51 @@ class TestSizeBreakdown:
             str(home / ".cargo" / "registry" / "src")])
         r = p.clean(include_conditional=True)
         assert r.bytes_freed == 350_000
+
+
+class TestDebtapElevation:
+    """E-017: debtap databases are modeled, conditional, helper-cleaned."""
+
+    def _prov(self, ctx, target):
+        from cachecleaner.providers.pkgman import DebtapProvider
+        d = DebtapProvider(ctx)
+        d._target = str(target)
+        return d
+
+    def test_detect_size_explain(self, fx):
+        home, cache, cfg, ctx = fx
+        t = home / "debtap"; t.mkdir()
+        (t / "ubuntu-packages-files").write_bytes(b"x" * 900_000)
+        d = self._prov(ctx, t)
+        assert d.detect()
+        assert d.calculate_size().bytes == 900_000
+        assert "debtap -u" in d.explain()
+
+    def test_clean_success_verified(self, fx):
+        home, cache, cfg, ctx = fx
+        t = home / "debtap"; t.mkdir()
+        (t / "db").write_bytes(b"x" * 900_000)
+        d = self._prov(ctx, t)
+
+        def fake(target, keep=0, **kw):
+            assert target == "debtap"
+            for f in t.iterdir():
+                f.unlink()
+            return ElevationResult(ElevationStatus.SUCCESS, 900_000, 0)
+
+        with mock.patch.object(d, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_syscache", side_effect=fake):
+            r = d.clean()
+        assert r.bytes_freed == 900_000 and len(r.errors) == 0
+
+    def test_cancelled_message_names_provider(self, fx):
+        home, cache, cfg, ctx = fx
+        t = home / "debtap"; t.mkdir()
+        (t / "db").write_bytes(b"x" * 10)
+        d = self._prov(ctx, t)
+        with mock.patch.object(d, "needs_elevation", return_value=True), \
+             mock.patch.object(elevation, "run_syscache",
+                               return_value=ElevationResult(ElevationStatus.CANCELLED)):
+            r = d.clean()
+        assert r.errors.records[0].detail == "debtap databases cleanup cancelled."
+        assert (t / "db").exists()

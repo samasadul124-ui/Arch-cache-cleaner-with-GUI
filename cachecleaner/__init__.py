@@ -6,7 +6,7 @@ providers and CLI can be imported and tested on headless systems.
 
 from __future__ import annotations
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 APP_ID = "io.github.cachecleaner.App"
 APP_NAME = "Cache Cleaner"
 

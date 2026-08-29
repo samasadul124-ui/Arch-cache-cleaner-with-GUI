@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import threading
 from enum import Enum, auto
 from typing import Optional
@@ -149,6 +150,24 @@ class MainWindow(Adw.ApplicationWindow):
         prov_card.append(self.list)
         content.append(prov_card)
 
+        # advanced sweep (layer 5, manual selection only) ----------------
+        adv_head = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        adv_head.set_margin_top(6)
+        adv_lbl = Gtk.Label(
+            label="Advanced: show every folder named '*cache*' "
+                  "(you select each one yourself)")
+        adv_lbl.set_halign(Gtk.Align.START)
+        adv_lbl.add_css_class("caption")
+        self.adv_switch = Gtk.Switch()
+        self.adv_switch.set_valign(Gtk.Align.CENTER)
+        self.adv_switch.connect("state-set", self._on_advanced_toggled)
+        adv_head.append(adv_lbl)
+        adv_head.append(self.adv_switch)
+        content.append(adv_head)
+        self.adv_holder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.adv_holder.set_visible(False)
+        content.append(self.adv_holder)
+
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled.set_vexpand(True)
@@ -186,9 +205,12 @@ class MainWindow(Adw.ApplicationWindow):
         return False
 
     # ------------------------------------------------------------- scanning
-    def start_scan(self) -> None:
+    def start_scan(self, advanced: Optional[bool] = None) -> None:
         if self._busy:
             return
+        if advanced is None:
+            advanced = getattr(self, "_advanced", False)
+        self._advanced = bool(advanced)
         self._busy = True
         self.cancel_event.clear()
         self._set_state(State.SCANNING)
@@ -202,15 +224,26 @@ class MainWindow(Adw.ApplicationWindow):
     def _scan_worker(self) -> None:
         try:
             report = self.engine.scan(
-                progress=lambda f, m: GLib.idle_add(self._progress, f, m))
-            GLib.idle_add(self._on_scan_done, report)
+                progress=lambda f, m: GLib.idle_add(self._progress, f, m),
+                advanced=self._advanced)
+            sizes: dict = {}
+            sweep = report.by_id("advanced.cache-name-sweep")
+            if sweep is not None:
+                from ..core.fs import dir_size
+                for cp in sweep.provider.cache_paths()[:200]:
+                    try:
+                        sizes[cp.path] = dir_size(cp.path).bytes
+                    except OSError:
+                        sizes[cp.path] = 0
+            GLib.idle_add(self._on_scan_done, report, sizes)
         except Exception as exc:                       # noqa: BLE001
             log.log_event(_logger, "scan_fatal", error=str(exc), level=40)
             GLib.idle_add(self._on_scan_fatal, str(exc))
 
-    def _on_scan_done(self, report: ScanReport) -> bool:
+    def _on_scan_done(self, report: ScanReport, sizes: Optional[dict] = None) -> bool:
         self.report = report
         self._busy = False
+        self._build_advanced_card(sizes or {})
         self.total_label.set_label(format_bytes(report.total_bytes))
         self.sub_label.set_label(
             f"total detected cache · {report.provider_count} providers")
@@ -226,6 +259,67 @@ class MainWindow(Adw.ApplicationWindow):
         self.sub_label.set_label(msg)
         self._set_state(State.FATAL)
         return False
+
+    # ------------------------------------------------------- advanced sweep
+    def _on_advanced_toggled(self, _sw, state) -> bool:
+        self.start_scan(advanced=bool(state))
+        return True
+
+    def _build_advanced_card(self, sizes: dict) -> None:
+        child = self.adv_holder.get_first_child()
+        while child is not None:
+            nxt = child.get_next_sibling()
+            self.adv_holder.remove(child)
+            child = nxt
+        sweep = (self.report.by_id("advanced.cache-name-sweep")
+                 if self.report else None)
+        if sweep is None:
+            self.adv_holder.set_visible(False)
+            return
+        paths = [cp.path for cp in sweep.provider.cache_paths()]
+        if not paths:
+            self.adv_holder.set_visible(False)
+            return
+        self.adv_holder.set_visible(True)
+        self._sweep_checks: list = []
+        box = Gtk.ListBox()
+        box.set_selection_mode(Gtk.SelectionMode.NONE)
+        box.add_css_class("boxed-list")
+        home = self.engine.home
+        for pth in paths[:200]:
+            row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            row.set_margin_top(4)
+            row.set_margin_bottom(4)
+            row.set_margin_start(8)
+            row.set_margin_end(8)
+            cb = Gtk.CheckButton()
+            cb.set_tooltip_text(pth)
+            lbl = Gtk.Label(label=f"{os.path.relpath(pth, home)}   "
+                                  f"{format_bytes(sizes.get(pth, 0))}")
+            lbl.set_halign(Gtk.Align.START)
+            lbl.add_css_class("caption")
+            row.append(cb)
+            row.append(lbl)
+            box.append(row)
+            self._sweep_checks.append((cb, pth))
+        if len(paths) > 200:
+            more = Gtk.Label(label=f"…and {len(paths) - 200} more "
+                                   "(use the CLI --advanced to list all)")
+            more.add_css_class("caption")
+            box.append(more)
+        btn = Gtk.Button(label="Clean selected")
+        btn.add_css_class("destructive-action")
+        btn.connect("clicked", lambda _b: self._clean_selected_sweep(sweep))
+        self.adv_holder.append(box)
+        self.adv_holder.append(btn)
+
+    def _clean_selected_sweep(self, sweep) -> None:
+        selected = {pth for cb, pth in getattr(self, "_sweep_checks", [])
+                    if cb.get_active()}
+        if not selected:
+            return
+        sweep.provider.selected = selected
+        self._start_clean({sweep.provider.id}, {sweep.provider.id})
 
     # -------------------------------------------------------------- cleaning
     def _approved_conditional(self) -> set[str]:
@@ -245,6 +339,8 @@ class MainWindow(Adw.ApplicationWindow):
             if not isinstance(row, ProviderRow):
                 continue
             p = row.scan.provider
+            if getattr(p, "manual_selection_only", False):
+                continue
             if p.safety is SafetyLevel.SAFE_CACHE and not row.scan.needs_elevation:
                 ids.add(p.id)
         return ids

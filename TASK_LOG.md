@@ -614,3 +614,18 @@ next one starts. Errors encountered are mirrored into `ERRORS.md` with full deta
   errors E-001–E-016 all recorded with resolutions · payload ~101 KiB.
 - **Result:** pushed; repository remains public; no further work planned.
 - **Git commit:** `task: final documentation pass and project closure`
+
+## Tasks 72-78 — Maintenance release 0.1.6: debtap coverage (E-017)
+- **Task:** identify + safely clean /var/cache/debtap (user's Filelight finding).
+- **Files:** helper (named-target allowlist), elevation (run_syscache), pkgman
+  (SystemCacheProvider base + DebtapProvider), registry, tests, policy wording,
+  README, ERRORS.md.
+- **Safety posture:** debtap = CONDITIONAL_CACHE; deletion only via polkit +
+  helper whose internal allowlist makes arbitrary paths impossible; fresh
+  before/after measurement; cancelled/auth-failed/partial messages named.
+- **Tests:** helper live (debtap freed 1.1 MiB → REMAINING 0; legacy numeric OK;
+  bad target rc=2), debtap provider matrix, elevation argv contract, full
+  suite green, GUI smoke PASS.
+- **Result:** v0.1.6 tagged/pushed with pinned sha.
+- **Git commit:** E-017 series
+- **Next task:** closure, final.

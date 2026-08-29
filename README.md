@@ -8,13 +8,13 @@ to report the real result.
 Built with **GTK 4 + libadwaita** — a native Linux app, no web runtime, no
 bundled dependencies. Installed payload: **~100 KiB** (target was < 50 MB).
 
-![status](https://img.shields.io/badge/version-0.1.5-blue)
+![status](https://img.shields.io/badge/version-0.1.6-blue)
 
 ## Features
 
 * **Dynamic cache discovery** — not a hard-coded list: browsers (Firefox,
   Chrome, Chromium, Brave, Edge, Vivaldi, Opera), package managers (pacman,
-  yay, paru, flatpak), dev tools (npm, pnpm, yarn, pip, Go, Cargo, rustup,
+  yay, paru, flatpak, debtap), dev tools (npm, pnpm, yarn, pip, Go, Cargo, rustup,
   ccache, Gradle, Maven), VS Code/VSCodium, other Electron apps, thumbnails,
   fontconfig, Mesa/GPU shader caches, KDE sycoca — plus every unclaimed
   folder in `~/.cache` (XDG contract).
@@ -71,7 +71,7 @@ Or manually:
 ```bash
 git clone https://github.com/samasadul124-ui/Arch-cache-cleaner-with-GUI
 cd Arch-cache-cleaner-with-GUI/packaging
-makepkg -si          # builds cachecleaner-0.1.5-any.pkg.tar.zst and installs
+makepkg -si          # builds cachecleaner-0.1.6-any.pkg.tar.zst and installs
 ```
 
 Then launch **"Cache Cleaner"** from your application menu, or run
@@ -155,8 +155,9 @@ deletes anything from a real home directory.
 
 ## Project status — CLOSED at v0.1.5
 
-Development closed on **2026-08-26** at version **0.1.5**. The repository
-remains public as-is; no further development is planned.
+Development closed on **2026-08-26** at version **0.1.5**, then
+reopened once for maintenance release **0.1.6** (debtap database coverage,
+user-requested). Final state: **v0.1.6**.
 
 **Delivered:**
 

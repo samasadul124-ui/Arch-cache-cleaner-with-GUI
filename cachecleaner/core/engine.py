@@ -20,7 +20,7 @@ from .discovery import OtherXdgCachesProvider, claimed_cache_basenames
 from .errors import ErrorBucket, ErrorKind
 from .provider import CacheProvider, ProviderCleanResult, ProviderContext
 from .safety import PathSafety, SafetyLevel, default_user_roots
-from ..providers import detect_all
+from ..providers import CacheNameSweepProvider, detect_all
 
 __all__ = ["ProviderScan", "ScanReport", "CleanReport", "Engine"]
 
@@ -120,6 +120,9 @@ class Engine:
         """Allowlist = default roots + every path a provider declares."""
         roots = list(default_user_roots(self.home))
         for p in providers:
+            # manual-selection sweep paths must not widen the global allowlist
+            if getattr(p, "manual_selection_only", False):
+                continue
             for extra in getattr(type(p), "extra_cache_roots", ()) or ():
                 roots.append(self.ctx.expand(extra))
             try:
@@ -130,7 +133,8 @@ class Engine:
         self.ctx.safety = PathSafety(home=self.home, allowed_roots=roots)
 
     # -------------------------------------------------------------- scan
-    def scan(self, progress: Optional[ProgressCb] = None) -> ScanReport:
+    def scan(self, progress: Optional[ProgressCb] = None,
+             advanced: bool = False) -> ScanReport:
         t0 = time.monotonic()
         log.log_event(_logger, "scan_start", home=self.home)
         report = ScanReport()
@@ -138,6 +142,8 @@ class Engine:
         providers = detect_all(self.ctx)
         providers.append(OtherXdgCachesProvider(
             self.ctx, claimed_cache_basenames(self.ctx, providers)))
+        if advanced:
+            providers.append(CacheNameSweepProvider(self.ctx))
         providers = [p for p in providers if p.detect()]
         self._extend_safety(providers)
 

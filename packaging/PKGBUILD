@@ -6,7 +6,7 @@
 # build()/package() cd into "$srcdir/$_srcrepo-$pkgver" explicitly.
 
 pkgname=cachecleaner
-pkgver=0.1.5
+pkgver=0.1.6
 pkgrel=1
 pkgdesc="Modern, safe cache-cleaning utility (GTK4/libadwaita) for EndeavourOS / Arch Linux"
 arch=('any')
